@@ -40,13 +40,43 @@ const signup = async (req, res) => {
     });
 
     if (user) {
-      res.status(201).json({
-        _id: user._id,
-        fullname: user.fullname,
-        email: user.email,
-        username: user.username,
-        token: generateToken(user._id),
-      });
+      // Generate random 6-digit OTP
+      const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+      user.verifyEmailOtp = crypto.createHash('sha256').update(verifyCode).digest('hex');
+      user.verifyEmailExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
+      await user.save({ validateBeforeSave: false });
+
+      try {
+        await sendEmail({
+          to: user.email,
+          name: user.fullname,
+          subject: 'Verify your email - Legacy Bridge Publishing',
+          template: 'verifyEmail',
+          verifyCode: verifyCode, 
+        });
+
+        res.status(201).json({
+          message: 'User registered successfully. Please verify your email with the OTP sent to you.',
+          _id: user._id,
+          fullname: user.fullname,
+          email: user.email,
+          username: user.username,
+        });
+      } catch (err) {
+        console.error(err);
+        user.verifyEmailOtp = undefined;
+        user.verifyEmailExpire = undefined;
+        await user.save({ validateBeforeSave: false });
+        // Still return 201 because user was created even if email failed
+        res.status(201).json({ 
+          message: 'User registered successfully, but verification email could not be sent.',
+          _id: user._id,
+          fullname: user.fullname,
+          email: user.email,
+          username: user.username,
+        });
+      }
     } else {
       res.status(400).json({ message: 'Invalid user data' });
     }
@@ -198,9 +228,100 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// @desc    Resend Verification Email
+// @route   POST /api/auth/resend-verification
+// @access  Public
+const resendVerificationEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Please provide an email address' });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'There is no user with that email' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'Email is already verified' });
+    }
+
+    // Generate random 6-digit OTP
+    const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.verifyEmailOtp = crypto.createHash('sha256').update(verifyCode).digest('hex');
+    user.verifyEmailExpire = Date.now() + 10 * 60 * 1000;
+
+    await user.save({ validateBeforeSave: false });
+
+    // Send email via Brevo
+    try {
+      await sendEmail({
+        to: user.email,
+        name: user.fullname,
+        subject: 'Verify your email - Legacy Bridge Publishing',
+        template: 'verifyEmail',
+        verifyCode: verifyCode, 
+      });
+
+      res.status(200).json({ message: 'Verification OTP sent to email' });
+    } catch (err) {
+      user.verifyEmailOtp = undefined;
+      user.verifyEmailExpire = undefined;
+      await user.save({ validateBeforeSave: false });
+      return res.status(500).json({ message: 'Email could not be sent' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Verify Email
+// @route   POST /api/auth/verify-email
+// @access  Public
+const verifyEmail = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ message: 'Please provide email and OTP' });
+    }
+
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+    const user = await User.findOne({
+      email,
+      verifyEmailOtp: hashedOtp,
+      verifyEmailExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid OTP or OTP has expired' });
+    }
+
+    user.isVerified = true;
+    user.verifyEmailOtp = undefined;
+    user.verifyEmailExpire = undefined;
+
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({ message: 'Email verified successfully' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 module.exports = {
   signup,
   login,
   forgotPassword,
   resetPassword,
+  resendVerificationEmail,
+  verifyEmail
 };

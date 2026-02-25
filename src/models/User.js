@@ -40,6 +40,12 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: false
   },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  verifyEmailOtp: String,
+  verifyEmailExpire: Date,
   resetPasswordOtp: String,
   resetPasswordExpire: Date,
 }, {
