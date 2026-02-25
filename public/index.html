@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legacy Bridge Publishing - API Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0d1117;
+      --sidebar-bg: #161b22;
+      --text-main: #c9d1d9;
+      --text-muted: #8b949e;
+      --border-color: #30363d;
+      --accent-color: #58a6ff;
+      --get-color: #2ea043;
+      --post-color: #1f6feb;
+      --put-color: #e3b341;
+      --delete-color: #f85149;
+      --code-bg: #010409;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background-color: var(--sidebar-bg);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .brand {
+      padding: 24px 20px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .menu { padding: 20px 0; }
+
+    .menu-group { margin-bottom: 24px; }
+    
+    .menu-title {
+      padding: 0 20px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .menu-item {
+      padding: 8px 20px;
+      font-size: 14px;
+      color: var(--text-main);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+
+    .menu-item:hover {
+      background-color: rgba(255,255,255,0.05);
+      color: #fff;
+    }
+
+    .method-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      width: 50px;
+      text-align: center;
+    }
+
+    .badge-get { background: rgba(46,160,67,0.15); color: var(--get-color); }
+    .badge-post { background: rgba(31,111,235,0.15); color: var(--post-color); }
+    .badge-put { background: rgba(227,179,65,0.15); color: var(--put-color); }
+    .badge-delete { background: rgba(248,81,73,0.15); color: var(--delete-color); }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+
+    .header {
+      padding: 40px 60px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .endpoint-section {
+      display: flex;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .endpoint-info {
+      flex: 1;
+      padding: 60px;
+    }
+
+    .endpoint-meta {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .endpoint-url {
+      font-family: monospace;
+      font-size: 15px;
+      background: var(--code-bg);
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .endpoint-title {
+      font-size: 24px;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .endpoint-desc {
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    .req-params h3 {
+      font-size: 14px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .param-row {
+      display: flex;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(48,54,61,0.5);
+    }
+
+    .param-name { width: 150px; font-family: monospace; font-weight: 600; color: #fff;}
+    .param-type { width: 100px; color: var(--accent-color); font-family: monospace; font-size: 13px;}
+    .param-desc { flex: 1; color: var(--text-muted); font-size: 14px; }
+
+    .endpoint-example {
+      width: 45%;
+      background: var(--code-bg);
+      padding: 60px 40px;
+      border-left: 1px solid var(--border-color);
+    }
+
+    .example-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 15px;
+    }
+
+    pre {
+      background: #0d1117;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #e6edf3;
+      margin-bottom: 30px;
+    }
+
+    /* specific highlights */
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .boolean { color: #ff7b72; }
+    .key { color: #7ee787; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+      API Explorer
+    </div>
+    
+    <div class="menu">
+      <div class="menu-group">
+        <div class="menu-title">Authentication</div>
+        <a href="#auth-signup" class="menu-item"><span class="method-badge badge-post">POST</span> Signup</a>
+        <a href="#auth-login" class="menu-item"><span class="method-badge badge-post">POST</span> Login</a>
+        <a href="#auth-forgot" class="menu-item"><span class="method-badge badge-post">POST</span> Forgot Password</a>
+        <a href="#auth-reset" class="menu-item"><span class="method-badge badge-put">PUT</span> Reset Password</a>
+      </div>
+
+      <div class="menu-group">
+        <div class="menu-title">Categories</div>
+        <a href="#cat-get-all" class="menu-item"><span class="method-badge badge-get">GET</span> List Categories</a>
+        <a href="#cat-create" class="menu-item"><span class="method-badge badge-post">POST</span> Create Category</a>
+        <a href="#cat-update" class="menu-item"><span class="method-badge badge-put">PUT</span> Update Category</a>
+        <a href="#cat-delete" class="menu-item"><span class="method-badge badge-delete">DEL</span> Delete Category</a>
+      </div>
+
+      <div class="menu-group">
+        <div class="menu-title">Books</div>
+        <a href="#book-get-all" class="menu-item"><span class="method-badge badge-get">GET</span> List Books</a>
+        <a href="#book-get-single" class="menu-item"><span class="method-badge badge-get">GET</span> Get Book</a>
+        <a href="#book-create" class="menu-item"><span class="method-badge badge-post">POST</span> Create Book</a>
+        <a href="#book-update" class="menu-item"><span class="method-badge badge-put">PUT</span> Update Book</a>
+        <a href="#book-delete" class="menu-item"><span class="method-badge badge-delete">DEL</span> Delete Book</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="header">
+      <h1>API Reference v1</h1>
+      <p style="color: var(--text-muted); font-size: 18px; line-height: 1.6;">
+        Welcome to the official REST API for Legacy Bridge Publishing. All endpoints respond with standard JSON. Write operations require a Bearer token.
+      </p>
+    </div>
+
+    <!-- Signup Endpoint -->
+    <section id="auth-signup" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Register new user</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/auth/signup</span>
+        </div>
+        <p class="endpoint-desc">Register a new user account. Returns a JWT token upon successful creation.</p>
+        
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">fullname</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Full name of the user.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">email</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. User's unique email address.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">username</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Unique username.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">password</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Minimum 8 characters, containing uppercase, lowercase, numbers, and symbols.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"fullname"</span>: <span class="string">"Jane Doe"</span>,
+  <span class="key">"email"</span>: <span class="string">"jane@example.com"</span>,
+  <span class="key">"username"</span>: <span class="string">"janedoe"</span>,
+  <span class="key">"password"</span>: <span class="string">"P@ssw0rd123!"</span>
+}</pre>
+        <div class="example-title">Example Response (201 Created)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"64f1e9c..."</span>,
+  <span class="key">"fullname"</span>: <span class="string">"Jane Doe"</span>,
+  <span class="key">"email"</span>: <span class="string">"jane@example.com"</span>,
+  <span class="key">"username"</span>: <span class="string">"janedoe"</span>,
+  <span class="key">"token"</span>: <span class="string">"eyJhbGciOiJIUzI1NiIsIn..."</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Login Endpoint -->
+    <section id="auth-login" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Login user</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/auth/login</span>
+        </div>
+        <p class="endpoint-desc">Authenticate an existing user and return a JWT token. Can use either username or email.</p>
+        
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">email</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required if username is not provided.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">username</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required if email is not provided.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">password</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required user password.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"email"</span>: <span class="string">"test@example.com"</span>,
+  <span class="key">"password"</span>: <span class="string">"P@ssw0rd123!"</span>
+}</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"64f1e9c..."</span>,
+  <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
+  <span class="key">"token"</span>: <span class="string">"eyJhbGciOiJIUzI1NiIsIn..."</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Forgot Password Endpoint -->
+    <section id="auth-forgot" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Forgot Password</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/auth/forgotpassword</span>
+        </div>
+        <p class="endpoint-desc">Sends a 6-digit OTP to the user's email address if registered.</p>
+        
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">email</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Registered user email address.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"email"</span>: <span class="string">"test@example.com"</span>
+}</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"OTP sent to email"</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Reset Password Endpoint -->
+    <section id="auth-reset" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Reset Password</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
+          <span class="endpoint-url">/api/auth/resetpassword</span>
+        </div>
+        <p class="endpoint-desc">Resets the user's password using the OTP and returns a new JWT token.</p>
+        
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">email</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. The user's email address.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">otp</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. The 6-digit OTP sent to the email.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">newPassword</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. New strong password string.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"email"</span>: <span class="string">"test@example.com"</span>,
+  <span class="key">"otp"</span>: <span class="string">"123456"</span>,
+  <span class="key">"newPassword"</span>: <span class="string">"NewP@ssw0rd!"</span>
+}</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Password reset successfully"</span>,
+  <span class="key">"_id"</span>: <span class="string">"64f1e9c..."</span>,
+  <span class="key">"token"</span>: <span class="string">"eyJhbGciOiJIUzI1NiIsIn..."</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- List Categories Endpoint -->
+    <section id="cat-get-all" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">List Categories</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/categories</span>
+        </div>
+        <p class="endpoint-desc">Fetches a list of all active categories. Sorts alphabetically by name.</p>
+        
+        <div class="req-params">
+          <h3>Query Parameters (Admin Only)</h3>
+          <div class="param-row">
+            <span class="param-name">includeDeleted</span>
+            <span class="param-type">boolean</span>
+            <span class="param-desc">Set to "true" to include soft-deleted categories. Requires Admin token.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>[
+  {
+    <span class="key">"_id"</span>: <span class="string">"699ed17b5..."</span>,
+    <span class="key">"name"</span>: <span class="string">"Science Fiction"</span>,
+    <span class="key">"description"</span>: <span class="string">"Sci-Fi books"</span>,
+    <span class="key">"isDeleted"</span>: <span class="boolean">false</span>
+  }
+]</pre>
+      </div>
+    </section>
+
+    <!-- Create Category Endpoint -->
+    <section id="cat-create" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Create Category</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/categories</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin privileges. Creates a new unique category.</p>
+        
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">name</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. The category name.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">description</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"name"</span>: <span class="string">"Fantasy"</span>,
+  <span class="key">"description"</span>: <span class="string">"Books with magic"</span>
+}</pre>
+        <div class="example-title">Example Response (201 Created)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"699ed17c..."</span>,
+  <span class="key">"name"</span>: <span class="string">"Fantasy"</span>,
+  <span class="key">"description"</span>: <span class="string">"Books with magic"</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Update Category Endpoint -->
+    <section id="cat-update" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Update Category</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
+          <span class="endpoint-url">/api/categories/:id</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin privileges. Modifies an existing category.</p>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"name"</span>: <span class="string">"High Fantasy"</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Delete Category Endpoint -->
+    <section id="cat-delete" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Delete Category</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-delete" style="padding: 6px 12px; font-size: 13px;">DEL</span>
+          <span class="endpoint-url">/api/categories/:id</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin privileges. Soft-deletes a category.</p>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Category successfully removed (soft delete)"</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Get Books Endpoint -->
+    <section id="book-get-all" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">List Books</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/books</span>
+        </div>
+        <p class="endpoint-desc">Fetches a list of all active books in the library. Automatically populates category data.</p>
+        
+        <div class="req-params">
+          <h3>Query Parameters (Admin Only)</h3>
+          <div class="param-row">
+            <span class="param-name">includeDeleted</span>
+            <span class="param-type">boolean</span>
+            <span class="param-desc">Set to "true" to include soft-deleted books in the response array. Requires Admin token.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>[
+  {
+    <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
+    <span class="key">"bookTitle"</span>: <span class="string">"Dune"</span>,
+    <span class="key">"price"</span>: <span class="number">15.99</span>,
+    <span class="key">"bookImageId"</span>: <span class="string">"books/dune_cover_123"</span>,
+    <span class="key">"isDeleted"</span>: <span class="boolean">false</span>,
+    <span class="key">"category"</span>: {
+      <span class="key">"_id"</span>: <span class="string">"699ed17b5..."</span>,
+      <span class="key">"name"</span>: <span class="string">"Science Fiction"</span>
+    }
+  }
+]</pre>
+      </div>
+    </section>
+
+    <!-- Get Single Book Endpoint -->
+    <section id="book-get-single" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Get Book</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/books/:id</span>
+        </div>
+        <p class="endpoint-desc">Fetches a single book by its ID. Populates category data.</p>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
+  <span class="key">"bookTitle"</span>: <span class="string">"Dune"</span>,
+  <span class="key">"price"</span>: <span class="number">15.99</span>,
+  <span class="key">"bookImageId"</span>: <span class="string">"books/dune_cover_123"</span>,
+  <span class="key">"category"</span>: {
+    <span class="key">"_id"</span>: <span class="string">"699ed17b5..."</span>,
+    <span class="key">"name"</span>: <span class="string">"Science Fiction"</span>
+  }
+}</pre>
+      </div>
+    </section>
+
+    <!-- Create Book Endpoint -->
+    <section id="book-create" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Create Book</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/books</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin privileges. Creates a new book in the library.</p>
+        
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">bookTitle</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. The title of the book.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">author</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">aboutAuthor</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">description</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Summary of the book.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">price</span>
+            <span class="param-type">number</span>
+            <span class="param-desc">Required. Must be >= 0.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">bookImage</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. URL to cover image.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">bookImageId</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Cloudinary public ID for the image.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">bookUrl</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. URL to the book content/file.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">bookFormat</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. (e.g., PDF, EPUB, Physical)</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">category</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Category ObjectId.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"bookTitle"</span>: <span class="string">"Dune"</span>,
+  <span class="key">"author"</span>: <span class="string">"Frank Herbert"</span>,
+  <span class="key">"aboutAuthor"</span>: <span class="string">"He wrote Dune."</span>,
+  <span class="key">"description"</span>: <span class="string">"A book about sand."</span>,
+  <span class="key">"price"</span>: <span class="number">15.99</span>,
+  <span class="key">"bookImage"</span>: <span class="string">"http://example.com/dune.jpg"</span>,
+  <span class="key">"bookImageId"</span>: <span class="string">"books/dune_cover_123"</span>,
+  <span class="key">"bookUrl"</span>: <span class="string">"http://example.com/dune.epub"</span>,
+  <span class="key">"bookFormat"</span>: <span class="string">"EPUB"</span>,
+  <span class="key">"category"</span>: <span class="string">"699ed17b5eda62697780e3d8"</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Update Book Endpoint -->
+    <section id="book-update" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Update Book</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
+          <span class="endpoint-url">/api/books/:id</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin privileges. Modifies details of an existing book.</p>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"price"</span>: <span class="number">19.99</span>
+}</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
+  <span class="key">"bookTitle"</span>: <span class="string">"Dune"</span>,
+  <span class="key">"price"</span>: <span class="number">19.99</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Delete Book Endpoint -->
+    <section id="book-delete" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Delete Book</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-delete" style="padding: 6px 12px; font-size: 13px;">DEL</span>
+          <span class="endpoint-url">/api/books/:id</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin privileges. Soft-deletes a book.</p>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Book successfully removed (soft delete)"</span>
+}</pre>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
