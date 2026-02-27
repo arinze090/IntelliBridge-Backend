@@ -17,9 +17,10 @@ async function loadTemplate(templateName, context) {
 const sendEmail = async (options) => {
   try {
     // Compile HTML from template
+    // Pass the entire options object to the template so any custom variables are available
     const htmlContent = await loadTemplate(options.template, {
-      resetCode: options.resetCode,
-      email: options.to,
+      ...options,
+      email: options.to, // Keep these as fallbacks/conveniences depending on template design
       name: options.name,
     });
 
