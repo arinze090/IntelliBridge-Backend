@@ -6,39 +6,38 @@ const handlebars = require('handlebars');
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
 // Helper function to compile the Handlebars template
-async function loadTemplate(templateName, context) {
-  // Using path.resolve to ensure we find the views directory from the project root
-  const templatePath = path.resolve('views', `${templateName}.handlebars`);
+// Use __dirname so the path is always relative to this file, not the cwd
+function loadTemplate(templateName, context) {
+  const templatePath = path.join(__dirname, '../../views', `${templateName}.handlebars`);
   const source = fs.readFileSync(templatePath, 'utf8');
   const compiledTemplate = handlebars.compile(source);
   return compiledTemplate(context);
 }
 
 const sendEmail = async (options) => {
-  try {
-    // Compile HTML from template
-    // Pass the entire options object to the template so any custom variables are available
-    const htmlContent = await loadTemplate(options.template, {
-      ...options,
-      email: options.to, // Keep these as fallbacks/conveniences depending on template design
-      name: options.name,
-    });
+  // Compile HTML from template
+  // Pass the entire options object to the template so any custom variables are available
+  const htmlContent = loadTemplate(options.template, {
+    ...options,
+    email: options.to, // convenience alias so templates can use {{email}} or {{to}}
+  });
 
-    const data = {
-      sender: {
-        email: process.env.EMAIL_FROM || 'noreply@legacybridgepublishing.com',
-        name: 'Legacy Bridge Publishing',
+  const data = {
+    sender: {
+      email: process.env.EMAIL_FROM || 'noreply@legacybridgepublishing.com',
+      name: 'Legacy Bridge Publishing',
+    },
+    to: [
+      {
+        email: options.to,
+        name: options.name || 'User',
       },
-      to: [
-        {
-          email: options.to,
-          name: options.name || 'User',
-        },
-      ],
-      subject: options.subject,
-      htmlContent,
-    };
+    ],
+    subject: options.subject,
+    htmlContent,
+  };
 
+  try {
     const response = await axios.post(BREVO_API_URL, data, {
       headers: {
         'api-key': process.env.BREVO_API_KEY,
@@ -48,7 +47,10 @@ const sendEmail = async (options) => {
 
     console.log('Email sent successfully:', response.data.messageId);
   } catch (err) {
-    console.error('Error sending email via Brevo:', err.response?.data || err.message);
+    // Log the full Brevo error and re-throw so the caller can handle it
+    const errMsg = err.response?.data || err.message;
+    console.error('Error sending email via Brevo:', errMsg);
+    throw new Error(`Email delivery failed: ${JSON.stringify(errMsg)}`);
   }
 };
 

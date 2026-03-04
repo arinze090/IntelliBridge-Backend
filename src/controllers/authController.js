@@ -107,6 +107,10 @@ const login = async (req, res) => {
       $or: [{ email }, { username }]
     }).select('+password'); // Explicitly include password for verification
 
+    if (user && user.isSuspended) {
+      return res.status(403).json({ message: 'Your account has been suspended. Please contact the technical team for assistance.' });
+    }
+
     if (user && (await user.matchPassword(password))) {
       res.json({
         _id: user._id,

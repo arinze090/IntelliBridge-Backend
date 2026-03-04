@@ -394,6 +394,14 @@
       </div>
 
       <div class="menu-group">
+        <div class="menu-title">Users (Admin)</div>
+        <a href="#user-get-all" class="menu-item"><span class="method-badge badge-get">GET</span> List Users</a>
+        <a href="#user-get-one" class="menu-item"><span class="method-badge badge-get">GET</span> Get User</a>
+        <a href="#user-admin" class="menu-item"><span class="method-badge badge-put">PUT</span> Toggle Admin</a>
+        <a href="#user-suspend" class="menu-item"><span class="method-badge badge-put">PUT</span> Suspend / Reactivate</a>
+      </div>
+
+      <div class="menu-group">
         <div class="menu-title">Categories</div>
         <a href="#cat-get-all" class="menu-item"><span class="method-badge badge-get">GET</span> List Categories</a>
         <a href="#cat-create" class="menu-item"><span class="method-badge badge-post">POST</span> Create Category</a>
@@ -419,6 +427,134 @@
         Welcome to the official REST API for Legacy Bridge Publishing. All endpoints respond with standard JSON. Write operations require a Bearer token.
       </p>
     </div>
+
+    </div>
+
+    <!-- ============ USERS ============ -->
+
+    <!-- List Users Endpoint -->
+    <section id="user-get-all" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">List All Users</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/users</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Returns all registered users. Sensitive OTP fields are excluded.</p>
+        <div class="req-params">
+          <h3>Headers</h3>
+          <div class="param-row">
+            <span class="param-name">Authorization</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Bearer {adminToken}</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>[
+  {
+    <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
+    <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
+    <span class="key">"email"</span>: <span class="string">"john@example.com"</span>,
+    <span class="key">"username"</span>: <span class="string">"johndoe"</span>,
+    <span class="key">"isAdmin"</span>: <span class="boolean">false</span>,
+    <span class="key">"isVerified"</span>: <span class="boolean">true</span>,
+    <span class="key">"isSuspended"</span>: <span class="boolean">false</span>
+  }
+]</pre>
+      </div>
+    </section>
+
+    <!-- Get Single User Endpoint -->
+    <section id="user-get-one" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Get User by ID</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/users/:id</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Returns a single user by their MongoDB ID.</p>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
+  <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
+  <span class="key">"email"</span>: <span class="string">"john@example.com"</span>,
+  <span class="key">"isAdmin"</span>: <span class="boolean">false</span>,
+  <span class="key">"isVerified"</span>: <span class="boolean">true</span>,
+  <span class="key">"isSuspended"</span>: <span class="boolean">false</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Toggle Admin Endpoint -->
+    <section id="user-admin" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Toggle Admin Status</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
+          <span class="endpoint-url">/api/users/:id/admin</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Grant or revoke admin privileges for a user.</p>
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">isAdmin</span>
+            <span class="param-type">boolean</span>
+            <span class="param-desc">Required. true to grant admin, false to revoke.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{ <span class="key">"isAdmin"</span>: <span class="boolean">true</span> }</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
+  <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
+  <span class="key">"email"</span>: <span class="string">"john@example.com"</span>,
+  <span class="key">"isAdmin"</span>: <span class="boolean">true</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Suspend User Endpoint -->
+    <section id="user-suspend" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Suspend / Reactivate User</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
+          <span class="endpoint-url">/api/users/:id/suspend</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Suspend or reactivate a user account. Suspended users cannot log in and will see a clear error message directing them to contact the technical team. Admins cannot be suspended.</p>
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">isSuspended</span>
+            <span class="param-type">boolean</span>
+            <span class="param-desc">Required. true to suspend, false to reactivate.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request (Suspend)</div>
+        <pre>{ <span class="key">"isSuspended"</span>: <span class="boolean">true</span> }</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
+  <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
+  <span class="key">"email"</span>: <span class="string">"john@example.com"</span>,
+  <span class="key">"isSuspended"</span>: <span class="boolean">true</span>,
+  <span class="key">"message"</span>: <span class="string">"User account has been suspended"</span>
+}</pre>
+        <div class="example-title">Login Response for Suspended User (403)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Your account has been suspended. Please contact the technical team for assistance."</span>
+}</pre>
+      </div>
+    </section>
 
     <!-- Signup Endpoint -->
     <section id="auth-signup" class="endpoint-section">
