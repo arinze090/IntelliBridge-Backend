@@ -9,11 +9,14 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
-app.use(cors({
+const corsOptions = {
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+};
+
+app.use(cors(corsOptions));
+
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
