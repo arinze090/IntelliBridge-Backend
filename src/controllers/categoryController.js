@@ -7,8 +7,8 @@ const createCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
     
-    // Check if category exists
-    const categoryExists = await Category.findOne({ name });
+    // Check if category exists (only active ones)
+    const categoryExists = await Category.findOne({ name, isDeleted: false });
 
     if (categoryExists) {
       return res.status(400).json({ message: 'Category already exists' });
@@ -75,6 +75,18 @@ const getCategoryById = async (req, res) => {
 // @access  Private/Admin
 const updateCategory = async (req, res) => {
   try {
+    // If renaming, check for conflict with active categories
+    if (req.body.name) {
+      const categoryExists = await Category.findOne({ 
+        name: req.body.name, 
+        isDeleted: false,
+        _id: { $ne: req.params.id }
+      });
+      if (categoryExists) {
+        return res.status(400).json({ message: 'Category already exists' });
+      }
+    }
+
     const category = await Category.findByIdAndUpdate(
       req.params.id,
       req.body,
