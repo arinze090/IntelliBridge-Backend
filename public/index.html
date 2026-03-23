@@ -417,6 +417,15 @@
         <a href="#book-update" class="menu-item"><span class="method-badge badge-put">PUT</span> Update Book</a>
         <a href="#book-delete" class="menu-item"><span class="method-badge badge-delete">DEL</span> Delete Book</a>
       </div>
+
+      <div class="menu-group">
+        <div class="menu-title">Orders</div>
+        <a href="#order-checkout" class="menu-item"><span class="method-badge badge-post">POST</span> Checkout</a>
+        <a href="#order-my-orders" class="menu-item"><span class="method-badge badge-get">GET</span> My Orders</a>
+        <a href="#order-my-library" class="menu-item"><span class="method-badge badge-get">GET</span> My Library</a>
+        <a href="#order-get-all" class="menu-item"><span class="method-badge badge-get">GET</span> List All Orders</a>
+        <a href="#order-get-one" class="menu-item"><span class="method-badge badge-get">GET</span> Get Order</a>
+      </div>
     </div>
   </aside>
 
@@ -1085,6 +1094,169 @@
         <div class="example-title">Example Response (200 OK)</div>
         <pre>{
   <span class="key">"message"</span>: <span class="string">"Book successfully removed (soft delete)"</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- ============ ORDERS ============ -->
+
+    <!-- Checkout Endpoint -->
+    <section id="order-checkout" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Checkout</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/orders/checkout</span>
+        </div>
+        <p class="endpoint-desc">Requires Auth. Verify payment and create an order, automatically granting books to the user's library and sending a receipt email.</p>
+        <div class="req-params">
+          <h3>Headers</h3>
+          <div class="param-row">
+            <span class="param-name">Authorization</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Bearer {token}</span>
+          </div>
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">paymentMethod</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. e.g. "paystack"</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">items</span>
+            <span class="param-type">array</span>
+            <span class="param-desc">Required. Array of Book Object IDs</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">transactionReference</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Valid reference from the payment gateway</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">paymentData</span>
+            <span class="param-type">object</span>
+            <span class="param-desc">Optional. Full response from payment gateway</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"paymentMethod"</span>: <span class="string">"paystack"</span>,
+  <span class="key">"items"</span>: [<span class="string">"69bffd64b1e9067a1c36b9cb"</span>],
+  <span class="key">"transactionReference"</span>: <span class="string">"ref_1773768426280"</span>
+}</pre>
+        <div class="example-title">Example Response (201 Created)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Purchase successful! Books added to your library."</span>,
+  <span class="key">"order"</span>: { ... }
+}</pre>
+      </div>
+    </section>
+
+    <!-- My Orders Endpoint -->
+    <section id="order-my-orders" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">My Orders</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/orders/my-orders</span>
+        </div>
+        <p class="endpoint-desc">Requires Auth. Returns the authenticated user's order history.</p>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>[
+  {
+    <span class="key">"_id"</span>: <span class="string">"69c12f2f..."</span>,
+    <span class="key">"items"</span>: [...],
+    <span class="key">"totalAmount"</span>: <span class="number">13700</span>,
+    <span class="key">"status"</span>: <span class="string">"completed"</span>
+  }
+]</pre>
+      </div>
+    </section>
+
+    <!-- My Library Endpoint -->
+    <section id="order-my-library" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">My Library</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/orders/my-library</span>
+        </div>
+        <p class="endpoint-desc">Requires Auth. Returns all books the authenticated user has purchased and has access to.</p>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>[
+  {
+    <span class="key">"book"</span>: {
+      <span class="key">"bookTitle"</span>: <span class="string">"Bring the Children Back"</span>,
+      <span class="key">"bookUrl"</span>: <span class="string">"https://..."</span>
+    },
+    <span class="key">"purchasedAt"</span>: <span class="string">"2026-03-23T12:16:47.763Z"</span>,
+    <span class="key">"accessGranted"</span>: <span class="boolean">true</span>
+  }
+]</pre>
+      </div>
+    </section>
+
+    <!-- List All Orders (Admin) Endpoint -->
+    <section id="order-get-all" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">List All Orders</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/orders</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin privileges. Returns a paginated list of all orders across the platform.</p>
+        <div class="req-params">
+          <h3>Query Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">page</span> <span class="param-type">number</span> <span class="param-desc">Page number (default: 1)</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">limit</span> <span class="param-type">number</span> <span class="param-desc">Results per page (default: 20)</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">status</span> <span class="param-type">string</span> <span class="param-desc">Filter by status (e.g. pending, completed, failed)</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>GET /api/orders?page=1&status=completed</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"orders"</span>: [...],
+  <span class="key">"page"</span>: <span class="number">1</span>,
+  <span class="key">"totalPages"</span>: <span class="number">5</span>,
+  <span class="key">"totalOrders"</span>: <span class="number">98</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Get Order by ID Endpoint -->
+    <section id="order-get-one" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Get Order by ID</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/orders/:id</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin privileges. Returns detailed information about a specific order.</p>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"69c12f2f..."</span>,
+  <span class="key">"user"</span>: {
+    <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
+    <span class="key">"email"</span>: <span class="string">"john@example.com"</span>
+  },
+  <span class="key">"items"</span>: [...],
+  <span class="key">"totalAmount"</span>: <span class="number">13700</span>
 }</pre>
       </div>
     </section>
