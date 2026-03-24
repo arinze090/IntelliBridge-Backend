@@ -426,6 +426,10 @@
         <a href="#order-get-all" class="menu-item"><span class="method-badge badge-get">GET</span> List All Orders</a>
         <a href="#order-get-one" class="menu-item"><span class="method-badge badge-get">GET</span> Get Order</a>
       </div>
+      <div class="menu-group">
+        <div class="menu-title">Test APIs</div>
+        <a href="#test-delete-user" class="menu-item"><span class="method-badge badge-delete">DEL</span> Delete User</a>
+      </div>
     </div>
   </aside>
 
@@ -444,7 +448,7 @@
     <!-- List Users Endpoint -->
     <section id="user-get-all" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">List All Users</h2>
+        <h2 class="endpoint-title">List All Users <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
           <span class="endpoint-url">/api/users</span>
@@ -478,7 +482,7 @@
     <!-- Get Single User Endpoint -->
     <section id="user-get-one" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">Get User by ID</h2>
+        <h2 class="endpoint-title">Get User by ID <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
           <span class="endpoint-url">/api/users/:id</span>
@@ -501,7 +505,7 @@
     <!-- Toggle Admin Endpoint -->
     <section id="user-admin" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">Toggle Admin Status</h2>
+        <h2 class="endpoint-title">Toggle Admin Status <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
           <span class="endpoint-url">/api/users/:id/admin</span>
@@ -532,7 +536,7 @@
     <!-- Suspend User Endpoint -->
     <section id="user-suspend" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">Suspend / Reactivate User</h2>
+        <h2 class="endpoint-title">Suspend / Reactivate User <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
           <span class="endpoint-url">/api/users/:id/suspend</span>
@@ -841,7 +845,7 @@
     <!-- Create Category Endpoint -->
     <section id="cat-create" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">Create Category</h2>
+        <h2 class="endpoint-title">Create Category <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
           <span class="endpoint-url">/api/categories</span>
@@ -880,7 +884,7 @@
     <!-- Update Category Endpoint -->
     <section id="cat-update" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">Update Category</h2>
+        <h2 class="endpoint-title">Update Category <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
           <span class="endpoint-url">/api/categories/:id</span>
@@ -898,7 +902,7 @@
     <!-- Delete Category Endpoint -->
     <section id="cat-delete" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">Delete Category</h2>
+        <h2 class="endpoint-title">Delete Category <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-delete" style="padding: 6px 12px; font-size: 13px;">DEL</span>
           <span class="endpoint-url">/api/categories/:id</span>
@@ -978,7 +982,7 @@
     <!-- Create Book Endpoint -->
     <section id="book-create" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">Create Book</h2>
+        <h2 class="endpoint-title">Create Book <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
           <span class="endpoint-url">/api/books</span>
@@ -1059,7 +1063,7 @@
     <!-- Update Book Endpoint -->
     <section id="book-update" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">Update Book</h2>
+        <h2 class="endpoint-title">Update Book <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
           <span class="endpoint-url">/api/books/:id</span>
@@ -1083,7 +1087,7 @@
     <!-- Delete Book Endpoint -->
     <section id="book-delete" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">Delete Book</h2>
+        <h2 class="endpoint-title">Delete Book <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-delete" style="padding: 6px 12px; font-size: 13px;">DEL</span>
           <span class="endpoint-url">/api/books/:id</span>
@@ -1205,7 +1209,7 @@
     <!-- List All Orders (Admin) Endpoint -->
     <section id="order-get-all" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">List All Orders</h2>
+        <h2 class="endpoint-title">List All Orders <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
           <span class="endpoint-url">/api/orders</span>
@@ -1240,7 +1244,7 @@
     <!-- Get Order by ID Endpoint -->
     <section id="order-get-one" class="endpoint-section">
       <div class="endpoint-info">
-        <h2 class="endpoint-title">Get Order by ID</h2>
+        <h2 class="endpoint-title">Get Order by ID <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
         <div class="endpoint-meta">
           <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
           <span class="endpoint-url">/api/orders/:id</span>
@@ -1257,6 +1261,29 @@
   },
   <span class="key">"items"</span>: [...],
   <span class="key">"totalAmount"</span>: <span class="number">13700</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- ============ TEST APIS ============ -->
+
+    <!-- Delete User Endpoint -->
+    <section id="test-delete-user" class="endpoint-section" style="border-left: 4px solid #f59e0b;">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Delete User <span style="font-size:12px; font-weight:normal; background:#fef3c7; color:#b45309; padding:2px 6px; border-radius:4px; margin-left:8px;">Test Use Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-delete" style="padding: 6px 12px; font-size: 13px;">DEL</span>
+          <span class="endpoint-url">/api/users/:id</span>
+        </div>
+        <p class="endpoint-desc" style="color: #b45309; font-weight: 500;">
+          ⚠️ This is a completely unrestricted testing endpoint. It requires no authentication and no admin token. 
+          It will be disabled in the production environment. Do not use for anything other than clearing test data.
+        </p>
+      </div>
+      <div class="endpoint-example" style="border-color: #fcd34d;">
+        <div class="example-title" style="background: #fef3c7; color: #b45309;">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"User deleted successfully"</span>
 }</pre>
       </div>
     </section>

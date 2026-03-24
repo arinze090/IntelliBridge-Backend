@@ -94,9 +94,29 @@ const updateUserSuspendStatus = async (req, res) => {
   }
 };
 
+// @desc    Delete a user
+// @route   DELETE /api/users/:id
+// @access  Private/Admin
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    await User.deleteOne({ _id: user._id });
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
   updateUserAdminStatus,
   updateUserSuspendStatus,
+  deleteUser,
 };
