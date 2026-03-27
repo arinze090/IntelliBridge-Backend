@@ -54,7 +54,6 @@ const orderSchema = new mongoose.Schema({
   transactionReference: {
     type: String,
     required: true,
-    unique: true,
     index: true,
   },
   // Raw payment gateway response stored as a JSON string

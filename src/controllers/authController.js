@@ -44,7 +44,7 @@ const signup = async (req, res) => {
       const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
 
       user.verifyEmailOtp = crypto.createHash('sha256').update(verifyCode).digest('hex');
-      user.verifyEmailExpire = Date.now() + 2 * 60 * 60 * 1000; // 2 hours
+      user.verifyEmailExpire = Date.now() + 6 * 60 * 60 * 1000; // 6 hours
       await user.save({ validateBeforeSave: false });
 
       try {
@@ -150,8 +150,8 @@ const forgotPassword = async (req, res) => {
 
     // Hash the OTP and save to database (for security)
     user.resetPasswordOtp = crypto.createHash('sha256').update(resetCode).digest('hex');
-    // Set expire time to 2 hours
-    user.resetPasswordExpire = Date.now() + 2 * 60 * 60 * 1000;
+    // Set expire time to 6 hours
+    user.resetPasswordExpire = Date.now() + 6 * 60 * 60 * 1000;
 
     await user.save({ validateBeforeSave: false });
 
@@ -257,7 +257,7 @@ const resendVerificationEmail = async (req, res) => {
     const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
 
     user.verifyEmailOtp = crypto.createHash('sha256').update(verifyCode).digest('hex');
-    user.verifyEmailExpire = Date.now() + 2 * 60 * 60 * 1000; // 2 hours
+    user.verifyEmailExpire = Date.now() + 6 * 60 * 60 * 1000; // 6 hours
 
     await user.save({ validateBeforeSave: false });
 

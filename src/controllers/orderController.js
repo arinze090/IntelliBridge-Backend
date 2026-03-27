@@ -1,4 +1,5 @@
 const axios = require('axios');
+const https = require('https');
 const Order = require('../models/Order');
 const UserBook = require('../models/UserBook');
 const Book = require('../models/Book');
@@ -9,7 +10,8 @@ const verifyPaystackPayment = async (reference) => {
   const response = await axios.get(
     `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
     {
-      timeout: 10000, // 10 second timeout
+      timeout: 30000, // 30 second timeout
+      httpsAgent: new https.Agent({ family: 4 }), // Force IPv4 to prevent Node.js DNS resolution hanging
       headers: {
         Authorization: `Bearer ${process.env.PAYSTACK_LIVE_SECRET_KEY}`,
         'Content-Type': 'application/json',
