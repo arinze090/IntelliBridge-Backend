@@ -327,16 +327,16 @@ const verifyEmail = async (req, res) => {
 
 // @desc    Deactivate User Account
 // @route   POST /api/auth/deactivate
-// @access  Private
+// @access  Public
 const deactivateAccount = async (req, res) => {
   try {
-    const { password } = req.body;
+    const { email, password } = req.body;
 
-    if (!password) {
-      return res.status(400).json({ message: 'Please provide your password to confirm deactivation' });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Please provide both email and password to confirm deactivation' });
     }
 
-    const user = await User.findById(req.user._id).select('+password');
+    const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });

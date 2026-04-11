@@ -15,6 +15,6 @@ router.post('/verify-email', verifyEmail);
 
 // User account management
 router.put('/profile', protect, updateProfile);
-router.post('/deactivate', protect, deactivateAccount);
+router.post('/deactivate', deactivateAccount);
 
 module.exports = router;

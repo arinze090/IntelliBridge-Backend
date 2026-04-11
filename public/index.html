@@ -820,14 +820,14 @@
           <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
           <span class="endpoint-url">/api/auth/deactivate</span>
         </div>
-        <p class="endpoint-desc">Requires Auth. Soft-deletes user account, appending a timestamp to their existing email and username so that they can register with it again later. Rejects any previously issued JWT tokens.</p>
+        <p class="endpoint-desc">Soft-deletes user account, appending a timestamp to their existing email and username so that they can register with it again later. Rejects any previously issued JWT tokens. Does not require authentication.</p>
         
         <div class="req-params">
-          <h3>Headers</h3>
+          <h3>Body Parameters</h3>
           <div class="param-row">
-            <span class="param-name">Authorization</span>
+            <span class="param-name">email</span>
             <span class="param-type">string</span>
-            <span class="param-desc">Required. Bearer {token}</span>
+            <span class="param-desc">Required. The email of the account to deactivate.</span>
           </div>
           <h3>Body Parameters</h3>
           <div class="param-row">
@@ -840,6 +840,7 @@
       <div class="endpoint-example">
         <div class="example-title">Example Request</div>
         <pre>{
+  <span class="key">"email"</span>: <span class="string">"test@example.com"</span>,
   <span class="key">"password"</span>: <span class="string">"P@ssw0rd123!"</span>
 }</pre>
         <div class="example-title">Example Response (200 OK)</div>
@@ -1134,6 +1135,11 @@
             <span class="param-type">string</span>
             <span class="param-desc">Optional. Category ObjectId.</span>
           </div>
+          <div class="param-row">
+            <span class="param-name">appleProductId</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Required for Apple Pay integration.</span>
+          </div>
         </div>
       </div>
       <div class="endpoint-example">
@@ -1148,7 +1154,8 @@
   <span class="key">"bookImageId"</span>: <span class="string">"books/dune_cover_123"</span>,
   <span class="key">"bookUrl"</span>: <span class="string">"http://example.com/dune.epub"</span>,
   <span class="key">"bookFormat"</span>: <span class="string">"EPUB"</span>,
-  <span class="key">"category"</span>: <span class="string">"699ed17b5eda62697780e3d8"</span>
+  <span class="key">"category"</span>: <span class="string">"699ed17b5eda62697780e3d8"</span>,
+  <span class="key">"appleProductId"</span>: <span class="string">"com.legacybridge.dune1"</span>
 }</pre>
       </div>
     </section>
@@ -1166,7 +1173,8 @@
       <div class="endpoint-example">
         <div class="example-title">Example Request</div>
         <pre>{
-  <span class="key">"price"</span>: <span class="number">19.99</span>
+  <span class="key">"price"</span>: <span class="number">19.99</span>,
+  <span class="key">"appleProductId"</span>: <span class="string">"com.legacybridge.dune_updated_tier"</span>
 }</pre>
         <div class="example-title">Example Response (200 OK)</div>
         <pre>{

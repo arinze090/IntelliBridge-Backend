@@ -130,9 +130,8 @@ echo ""
 
 echo "=== 17. Deactivate Test User Account ==="
 DEACTIVATE_RES=$(curl -s -X POST $URL/auth/deactivate \
-  -H "Authorization: Bearer $USER_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"password": "Password123!"}')
+  -d '{"email": "deactivateme@example.com", "password": "Password123!"}')
 echo "Deactivate Result: $DEACTIVATE_RES"
 echo ""
 

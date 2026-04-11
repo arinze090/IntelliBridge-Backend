@@ -17,6 +17,9 @@ const bookSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide the format of the book (e.g., PDF, EPUB, Physical)']
   },
+  appleProductId: {
+    type: String
+  },
   bookTitle: {
     type: String,
     required: [true, 'Please provide the book title'],
