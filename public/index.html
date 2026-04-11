@@ -391,6 +391,8 @@
         <a href="#auth-reset" class="menu-item"><span class="method-badge badge-put">PUT</span> Reset Password</a>
         <a href="#auth-verify" class="menu-item"><span class="method-badge badge-post">POST</span> Verify Email</a>
         <a href="#auth-resend" class="menu-item"><span class="method-badge badge-post">POST</span> Resend OTP</a>
+        <a href="#auth-profile" class="menu-item"><span class="method-badge badge-put">PUT</span> Update Profile</a>
+        <a href="#auth-deactivate" class="menu-item"><span class="method-badge badge-post">POST</span> Deactivate Account</a>
       </div>
 
       <div class="menu-group">
@@ -806,6 +808,97 @@
         <div class="example-title">Example Response (200 OK)</div>
         <pre>{
   <span class="key">"message"</span>: <span class="string">"Verification OTP sent to email"</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Deactivate Account Endpoint -->
+    <section id="auth-deactivate" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Deactivate Account</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/auth/deactivate</span>
+        </div>
+        <p class="endpoint-desc">Requires Auth. Soft-deletes user account, appending a timestamp to their existing email and username so that they can register with it again later. Rejects any previously issued JWT tokens.</p>
+        
+        <div class="req-params">
+          <h3>Headers</h3>
+          <div class="param-row">
+            <span class="param-name">Authorization</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Bearer {token}</span>
+          </div>
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">password</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Current password to confirm deactivation.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"password"</span>: <span class="string">"P@ssw0rd123!"</span>
+}</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Account has been deactivated successfully"</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Update Profile Endpoint -->
+    <section id="auth-profile" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Update Profile</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
+          <span class="endpoint-url">/api/auth/profile</span>
+        </div>
+        <p class="endpoint-desc">Requires Auth. Edit user profile details. Currently enables updating the username and profile picture.</p>
+        
+        <div class="req-params">
+          <h3>Headers</h3>
+          <div class="param-row">
+            <span class="param-name">Authorization</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Bearer {token}</span>
+          </div>
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">username</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. New unique username.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">profilePicture</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. URL to the uploaded profile picture.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">profilePictureId</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Standardized Cloudinary unique ID for the image.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"username"</span>: <span class="string">"newCoolUsername"</span>,
+  <span class="key">"profilePicture"</span>: <span class="string">"http://example.com/avatar.jpg"</span>,
+  <span class="key">"profilePictureId"</span>: <span class="string">"avatars/1239129412"</span>
+}</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"64f1e9c..."</span>,
+  <span class="key">"fullname"</span>: <span class="string">"Test User"</span>,
+  <span class="key">"email"</span>: <span class="string">"user@example.com"</span>,
+  <span class="key">"username"</span>: <span class="string">"newCoolUsername"</span>,
+  <span class="key">"profilePicture"</span>: <span class="string">"http://example.com/avatar.jpg"</span>,
+  <span class="key">"profilePictureId"</span>: <span class="string">"avatars/1239129412"</span>
 }</pre>
       </div>
     </section>

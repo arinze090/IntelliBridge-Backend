@@ -116,3 +116,26 @@ echo ""
 echo "=== 14. Get Single Soft-Deleted Book (Admin) - Expected: 200 ==="
 curl -vs -X GET $URL/books/$BOOK_2_ID -H "Authorization: Bearer $TOKEN" 2>&1 | grep "HTTP/"
 echo ""
+
+echo "=== 15. Create User explicitly for Deactivation Test ==="
+USER_RES=$(curl -s -X POST $URL/auth/signup -H "Content-Type: application/json" -d '{"fullname": "Test User", "email": "deactivateme@example.com", "username": "deactivatemetest", "password": "Password123!"}')
+echo "User Created: $USER_RES"
+echo ""
+
+echo "=== 16. Login as Test User ==="
+USER_LOGIN_RES=$(curl -s -X POST $URL/auth/login -H "Content-Type: application/json" -d '{"email": "deactivateme@example.com", "password": "Password123!"}')
+USER_TOKEN=$(echo $USER_LOGIN_RES | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+echo "Test User Token Acquired"
+echo ""
+
+echo "=== 17. Deactivate Test User Account ==="
+DEACTIVATE_RES=$(curl -s -X POST $URL/auth/deactivate \
+  -H "Authorization: Bearer $USER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"password": "Password123!"}')
+echo "Deactivate Result: $DEACTIVATE_RES"
+echo ""
+
+echo "=== 18. Attempt Login with Deactivated Account - Expected: 403 ==="
+curl -vs -X POST $URL/auth/login -H "Content-Type: application/json" -d '{"email": "deactivateme@example.com", "password": "Password123!"}' 2>&1 | grep "HTTP/"
+echo ""

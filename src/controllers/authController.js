@@ -111,6 +111,10 @@ const login = async (req, res) => {
       return res.status(403).json({ message: 'Your account has been suspended. Please contact the technical team for assistance.' });
     }
 
+    if (user && user.isDeleted) {
+      return res.status(403).json({ message: 'Your account has been deactivated.' });
+    }
+
     if (user && (await user.matchPassword(password))) {
       res.json({
         _id: user._id,
@@ -321,11 +325,106 @@ const verifyEmail = async (req, res) => {
   }
 };
 
+// @desc    Deactivate User Account
+// @route   POST /api/auth/deactivate
+// @access  Private
+const deactivateAccount = async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: 'Please provide your password to confirm deactivation' });
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.isDeleted) {
+      return res.status(400).json({ message: 'Account is already deactivated' });
+    }
+
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Incorrect password' });
+    }
+
+    user.isDeleted = true;
+    
+    const appendStr = `deleted_${Date.now()}_`;
+    const emailParts = user.email.split('@');
+    user.email = `${appendStr}${emailParts[0]}@${emailParts[1]}`;
+    user.username = `${appendStr}${user.username}`;
+    
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({ message: 'Account has been deactivated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Update User Profile
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const { username, profilePicture, profilePictureId } = req.body;
+
+    // If they are changing their username, check for uniqueness
+    if (username && username !== user.username) {
+      const usernameExists = await User.findOne({ username });
+      if (usernameExists) {
+        return res.status(400).json({ message: 'Username is already taken' });
+      }
+      user.username = username;
+    }
+
+    if (profilePicture !== undefined) {
+      user.profilePicture = profilePicture;
+    }
+
+    if (profilePictureId !== undefined) {
+      user.profilePictureId = profilePictureId;
+    }
+
+    await user.save();
+
+    res.json({
+      _id: user._id,
+      fullname: user.fullname,
+      email: user.email,
+      username: user.username,
+      profilePicture: user.profilePicture,
+      profilePictureId: user.profilePictureId,
+    });
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({ message: messages.join(', ') });
+    }
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 module.exports = {
   signup,
   login,
   forgotPassword,
   resetPassword,
   resendVerificationEmail,
-  verifyEmail
+  verifyEmail,
+  deactivateAccount,
+  updateProfile
 };

@@ -22,6 +22,12 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
+  profilePicture: {
+    type: String
+  },
+  profilePictureId: {
+    type: String
+  },
   password: {
     type: String,
     required: [true, 'Please provide a password'],
@@ -45,6 +51,10 @@ const userSchema = new mongoose.Schema({
     default: false
   },
   isSuspended: {
+    type: Boolean,
+    default: false
+  },
+  isDeleted: {
     type: Boolean,
     default: false
   },
