@@ -20,6 +20,10 @@ const bookSchema = new mongoose.Schema({
   appleProductId: {
     type: String
   },
+  tags: {
+    type: [String],
+    default: []
+  },
   bookTitle: {
     type: String,
     required: [true, 'Please provide the book title'],

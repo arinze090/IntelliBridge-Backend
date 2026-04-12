@@ -193,7 +193,11 @@ const getMyOrders = async (req, res) => {
 const getMyLibrary = async (req, res) => {
   try {
     const library = await UserBook.find({ user: req.user._id, accessGranted: true })
-      .populate('book', 'bookTitle author bookImage bookUrl bookFormat description category')
+      .populate({
+        path: 'book',
+        select: 'bookTitle author aboutAuthor bookImage bookUrl bookFormat description category appleProductId',
+        populate: { path: 'category' }
+      })
       .sort({ purchasedAt: -1 });
 
     res.json(library);
