@@ -62,6 +62,8 @@ const signup = async (req, res) => {
           fullname: user.fullname,
           email: user.email,
           username: user.username,
+          profilePicture: user.profilePicture,
+          profilePictureId: user.profilePictureId,
         });
       } catch (err) {
         console.error(err);
@@ -75,6 +77,8 @@ const signup = async (req, res) => {
           fullname: user.fullname,
           email: user.email,
           username: user.username,
+          profilePicture: user.profilePicture,
+          profilePictureId: user.profilePictureId,
         });
       }
     } else {
@@ -121,6 +125,8 @@ const login = async (req, res) => {
         fullname: user.fullname,
         email: user.email,
         username: user.username,
+        profilePicture: user.profilePicture,
+        profilePictureId: user.profilePictureId,
         token: generateToken(user._id),
       });
     } else {
@@ -223,6 +229,8 @@ const resetPassword = async (req, res) => {
       fullname: user.fullname,
       email: user.email,
       username: user.username,
+      profilePicture: user.profilePicture,
+      profilePictureId: user.profilePictureId,
       token: generateToken(user._id),
     });
 
