@@ -22,7 +22,7 @@ const verifyPaystackPayment = async (reference) => {
 };
 
 // Payment methods currently supported
-const SUPPORTED_PAYMENT_METHODS = ['paystack'];
+const SUPPORTED_PAYMENT_METHODS = ['paystack', 'applepay'];
 
 // @desc    Checkout — verify payment and create order
 // @route   POST /api/orders/checkout
@@ -73,6 +73,10 @@ const checkout = async (req, res) => {
         const errMsg = err.response?.data?.message || err.message;
         return res.status(402).json({ message: `Paystack verification error: ${errMsg}` });
       }
+    } else if (paymentMethod === 'applepay') {
+      // Apple Pay validation is handled on the client side.
+      // We just rely on the transactionReference uniqueness check above.
+      // Payment data is stored as is.
     }
     // Future payment methods go here:
     // else if (paymentMethod === 'flutterwave') { ... }
