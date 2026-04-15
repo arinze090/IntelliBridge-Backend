@@ -11,6 +11,7 @@ const orderItemSchema = new mongoose.Schema({
   author: { type: String, required: true },
   bookImage: { type: String },
   bookFormat: { type: String },
+  isbn: { type: String },
   price: { type: Number, required: true },
 }, { _id: false });
 
@@ -40,7 +41,7 @@ const orderSchema = new mongoose.Schema({
   // Payment gateway used for this order
   paymentMethod: {
     type: String,
-    enum: ['paystack'],
+    enum: ['paystack', 'applepay'],
     required: true,
     index: true,
   },

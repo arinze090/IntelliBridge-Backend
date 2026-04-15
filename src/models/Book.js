@@ -20,6 +20,9 @@ const bookSchema = new mongoose.Schema({
   appleProductId: {
     type: String
   },
+  isbn: {
+    type: String
+  },
   tags: {
     type: [String],
     default: []

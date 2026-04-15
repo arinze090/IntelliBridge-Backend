@@ -1047,6 +1047,7 @@
   {
     <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
     <span class="key">"bookTitle"</span>: <span class="string">"Dune"</span>,
+    <span class="key">"isbn"</span>: <span class="string">"978-0441172719"</span>,
     <span class="key">"price"</span>: <span class="number">15.99</span>,
     <span class="key">"bookImageId"</span>: <span class="string">"books/dune_cover_123"</span>,
     <span class="key">"isDeleted"</span>: <span class="boolean">false</span>,
@@ -1074,6 +1075,7 @@
         <pre>{
   <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
   <span class="key">"bookTitle"</span>: <span class="string">"Dune"</span>,
+  <span class="key">"isbn"</span>: <span class="string">"978-0441172719"</span>,
   <span class="key">"price"</span>: <span class="number">15.99</span>,
   <span class="key">"bookImageId"</span>: <span class="string">"books/dune_cover_123"</span>,
   <span class="key">"category"</span>: {
@@ -1156,6 +1158,11 @@
             <span class="param-type">string[]</span>
             <span class="param-desc">Optional. Array of string tags for filtering/searching.</span>
           </div>
+          <div class="param-row">
+            <span class="param-name">isbn</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. International Standard Book Number.</span>
+          </div>
         </div>
       </div>
       <div class="endpoint-example">
@@ -1172,7 +1179,8 @@
   <span class="key">"bookFormat"</span>: <span class="string">"EPUB"</span>,
   <span class="key">"category"</span>: <span class="string">"699ed17b5eda62697780e3d8"</span>,
   <span class="key">"appleProductId"</span>: <span class="string">"com.legacybridge.dune1"</span>,
-  <span class="key">"tags"</span>: [<span class="string">"sci-fi"</span>, <span class="string">"classic"</span>, <span class="string">"space"</span>]
+  <span class="key">"tags"</span>: [<span class="string">"sci-fi"</span>, <span class="string">"classic"</span>, <span class="string">"space"</span>],
+  <span class="key">"isbn"</span>: <span class="string">"978-0441172719"</span>
 }</pre>
       </div>
     </section>
@@ -1192,7 +1200,8 @@
         <pre>{
   <span class="key">"price"</span>: <span class="number">19.99</span>,
   <span class="key">"appleProductId"</span>: <span class="string">"com.legacybridge.dune_updated_tier"</span>,
-  <span class="key">"tags"</span>: [<span class="string">"bestseller"</span>, <span class="string">"award-winning"</span>]
+  <span class="key">"tags"</span>: [<span class="string">"bestseller"</span>, <span class="string">"award-winning"</span>],
+  <span class="key">"isbn"</span>: <span class="string">"978-0441172719"</span>
 }</pre>
         <div class="example-title">Example Response (200 OK)</div>
         <pre>{

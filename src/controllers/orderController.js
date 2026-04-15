@@ -99,6 +99,7 @@ const checkout = async (req, res) => {
       author: book.author,
       bookImage: book.bookImage,
       bookFormat: book.bookFormat,
+      isbn: book.isbn,
       price: book.price,
     }));
 
@@ -199,7 +200,7 @@ const getMyLibrary = async (req, res) => {
     const library = await UserBook.find({ user: req.user._id, accessGranted: true })
       .populate({
         path: 'book',
-        select: 'bookTitle author aboutAuthor bookImage bookUrl bookFormat description category appleProductId',
+        select: 'bookTitle author aboutAuthor bookImage bookUrl bookFormat description category appleProductId tags isbn',
         populate: { path: 'category' }
       })
       .sort({ purchasedAt: -1 });
@@ -257,7 +258,7 @@ const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate('user', 'fullname email username')
-      .populate('items.book', 'bookTitle author bookImage');
+      .populate('items.book', 'bookTitle author bookImage isbn tags');
 
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
