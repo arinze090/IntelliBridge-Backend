@@ -261,9 +261,9 @@ const resendVerificationEmail = async (req, res) => {
       return res.status(404).json({ message: 'There is no user with that email' });
     }
 
-    if (user.isVerified) {
-      return res.status(400).json({ message: 'Email is already verified' });
-    }
+    // if (user.isVerified) {
+    //   return res.status(400).json({ message: 'Email is already verified' });
+    // }
 
     // Generate random 6-digit OTP
     const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();

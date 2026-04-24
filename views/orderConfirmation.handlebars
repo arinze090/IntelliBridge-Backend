@@ -3,7 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Prevent iOS Mail dark mode from auto-inverting colors -->
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light">
   <title>Order Confirmation - Legacy Bridge Publishing</title>
+  <style>
+    /* Force light-mode rendering on Apple Mail / iOS */
+    :root { color-scheme: light only; }
+
+    /* Critical color overrides with !important — inline styles cannot use !important
+       but <style> block rules beat Apple Mail's dark-mode UA overrides */
+    .header-title    { color: #ffffff !important; }
+    .header-sub      { color: #B4975A !important; }
+    .header-greeting { color: #cbd5e0 !important; }
+    .total-label     { color: #ffffff !important; }
+    .total-amount    { color: #B4975A !important; }
+    .footer-name     { color: #ffffff !important; }
+    .footer-tagline  { color: #B4975A !important; }
+  </style>
 </head>
 <body style="margin:0; padding:0; background-color:#f4f6f9; font-family: 'Helvetica Neue', Arial, sans-serif; color:#333;">
 
@@ -22,9 +39,9 @@
                 height="72"
                 style="display:block; margin: 0 auto 16px; border-radius: 16px;"
               />
-              <h1 style="margin:0; font-size:26px; font-weight:700; color:#ffffff;">Order Confirmed!</h1>
-              <p style="margin:8px 0 0; font-size:14px; color:#B4975A; letter-spacing:1.5px; text-transform:uppercase; font-weight:600;">Purchase Successful</p>
-              <p style="margin:10px 0 0; font-size:15px; color:#cbd5e0;">Thank you for your purchase, <strong style="color:#ffffff;">{{name}}</strong>.</p>
+              <h1 class="header-title" style="margin:0; font-size:26px; font-weight:700; color:#ffffff;">Order Confirmed!</h1>
+              <p class="header-sub" style="margin:8px 0 0; font-size:14px; color:#B4975A; letter-spacing:1.5px; text-transform:uppercase; font-weight:600;">Purchase Successful</p>
+              <p class="header-greeting" style="margin:10px 0 0; font-size:15px; color:#cbd5e0;">Thank you for your purchase, <strong style="color:#ffffff;">{{name}}</strong>.</p>
             </td>
           </tr>
 
@@ -112,8 +129,8 @@
 
                 <!-- Total Row -->
                 <tr style="background-color:#001534;">
-                  <td colspan="3" style="padding:16px 12px; font-size:14px; font-weight:700; color:#ffffff;">Total</td>
-                  <td align="right" style="padding:16px 12px; font-size:16px; font-weight:800; color:#B4975A; white-space:nowrap;">{{currency}} {{totalAmount}}</td>
+                  <td colspan="3" class="total-label" style="padding:16px 12px; font-size:14px; font-weight:700; color:#ffffff;">Total</td>
+                  <td align="right" class="total-amount" style="padding:16px 12px; font-size:16px; font-weight:800; color:#B4975A; white-space:nowrap;">{{currency}} {{totalAmount}}</td>
                 </tr>
               </table>
             </td>
@@ -148,8 +165,8 @@
           <!-- Footer -->
           <tr>
             <td align="center" style="background-color:#001534; padding: 24px 40px; border-radius: 0 0 12px 12px;">
-              <p style="margin:0 0 4px; font-size:14px; font-weight:700; color:#ffffff;">Legacy Bridge Publishing</p>
-              <p style="margin:0; font-size:11px; color:#B4975A; letter-spacing:1px;">Preserving stories. Bridging generations.</p>
+              <p class="footer-name" style="margin:0 0 4px; font-size:14px; font-weight:700; color:#ffffff;">Legacy Bridge Publishing</p>
+              <p class="footer-tagline" style="margin:0; font-size:11px; color:#B4975A; letter-spacing:1px;">Preserving stories. Bridging generations.</p>
             </td>
           </tr>
 
