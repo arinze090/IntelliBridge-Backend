@@ -1,172 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Prevent iOS Mail dark mode from auto-inverting colors -->
-  <meta name="color-scheme" content="light only">
+  <meta name="color-scheme" content="light">
   <meta name="supported-color-schemes" content="light">
   <title>Order Confirmation - Legacy Bridge Publishing</title>
-  <style>
-    /* Force light-mode rendering on Apple Mail / iOS */
-    :root { color-scheme: light only; }
-
-    /* Critical color overrides with !important — inline styles cannot use !important
-       but <style> block rules beat Apple Mail's dark-mode UA overrides */
-    .header-title    { color: #ffffff !important; }
-    .header-sub      { color: #B4975A !important; }
-    .header-greeting { color: #cbd5e0 !important; }
-    .total-label     { color: #ffffff !important; }
-    .total-amount    { color: #B4975A !important; }
-    .footer-name     { color: #ffffff !important; }
-    .footer-tagline  { color: #B4975A !important; }
-  </style>
 </head>
-<body style="margin:0; padding:0; background-color:#f4f6f9; font-family: 'Helvetica Neue', Arial, sans-serif; color:#333;">
+<body style="margin:0; padding:0; background-color:#f0f4f8; font-family:'Helvetica Neue', Arial, sans-serif;">
 
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6f9; padding: 40px 0;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f4f8; padding:40px 0;">
     <tr>
       <td align="center">
-        <table width="620" cellpadding="0" cellspacing="0" border="0" style="max-width:620px; width:100%;">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; width:100%;">
 
-          <!-- Header with Logo -->
+          <!-- Header -->
           <tr>
-            <td align="center" style="background: linear-gradient(160deg, #001534 0%, #01224f 60%, #012d6b 100%); padding: 36px 40px 28px; border-radius: 12px 12px 0 0;">
+            <td align="center" style="background-color:#f7f8fa; padding:28px 40px 24px; border-radius:12px 12px 0 0; border:1px solid #e2e8f0; border-bottom:none;">
               <img
                 src="https://res.cloudinary.com/dze1xnnxx/image/upload/v1776426280/IntelliBridge_Blue_App_Icon_nnmxvu.png"
                 alt="Legacy Bridge Publishing"
-                width="72"
-                height="72"
-                style="display:block; margin: 0 auto 16px; border-radius: 16px;"
+                width="60"
+                height="60"
+                style="display:block; margin:0 auto 14px; border-radius:14px;"
               />
-              <h1 class="header-title" style="margin:0; font-size:26px; font-weight:700; color:#ffffff;">Order Confirmed!</h1>
-              <p class="header-sub" style="margin:8px 0 0; font-size:14px; color:#B4975A; letter-spacing:1.5px; text-transform:uppercase; font-weight:600;">Purchase Successful</p>
-              <p class="header-greeting" style="margin:10px 0 0; font-size:15px; color:#cbd5e0;">Thank you for your purchase, <strong style="color:#ffffff;">{{name}}</strong>.</p>
+              <p style="margin:0; font-size:20px; font-weight:700; color:#1a1a1a;">Order Confirmed!</p>
+              <p style="margin:6px 0 0; font-size:12px; color:#888888; letter-spacing:1px; text-transform:uppercase;">Purchase Successful</p>
+              <p style="margin:10px 0 0; font-size:14px; color:#555555;">Thank you for your purchase, <strong style="color:#1a1a1a;">{{name}}</strong>.</p>
             </td>
           </tr>
 
-          <!-- Success badge -->
+          <!-- Body -->
           <tr>
-            <td align="center" style="background-color:#ffffff; padding: 28px 40px 0;">
-              <table cellpadding="0" cellspacing="0" border="0">
+            <td style="background-color:#ffffff; padding:28px 40px 0; border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0;">
+
+              <!-- Success badge -->
+              <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
                 <tr>
-                  <td style="background-color:#f0fff4; border: 1.5px solid #9ae6b4; border-radius:50px; padding: 10px 24px;">
-                    <span style="font-size:14px; font-weight:600; color:#276749;">&#10003;&nbsp; Payment Successful</span>
+                  <td style="border:1px solid #86efac; border-radius:50px; padding:8px 20px; background-color:#f0fdf4;">
+                    <span style="font-size:13px; font-weight:600; color:#166534;">&#10003;&nbsp; Payment Successful</span>
                   </td>
                 </tr>
               </table>
-            </td>
-          </tr>
 
-          <!-- Order Meta -->
-          <tr>
-            <td style="background-color:#ffffff; padding: 24px 40px 0;">
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f7fafc; border-radius:10px; padding:0; border: 1px solid #e2e8f0;">
+              <!-- Order Meta -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e2e8f0; border-radius:10px; margin-bottom:28px;">
                 <tr>
-                  <td style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0;">
+                  <td style="padding:14px 18px; border-bottom:1px solid #e2e8f0;">
                     <table width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
-                        <td style="font-size:13px; color:#718096;">Order Reference</td>
-                        <td align="right" style="font-size:13px; font-weight:600; color:#2d3748; font-family: monospace;">{{transactionReference}}</td>
+                        <td style="font-size:13px; color:#888888;">Order Reference</td>
+                        <td align="right" style="font-size:13px; font-weight:600; color:#1a1a1a; font-family:'Courier New', Courier, monospace;">{{transactionReference}}</td>
                       </tr>
                     </table>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0;">
+                  <td style="padding:14px 18px; border-bottom:1px solid #e2e8f0;">
                     <table width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
-                        <td style="font-size:13px; color:#718096;">Order Date</td>
-                        <td align="right" style="font-size:13px; font-weight:600; color:#2d3748;">{{paidAt}}</td>
+                        <td style="font-size:13px; color:#888888;">Order Date</td>
+                        <td align="right" style="font-size:13px; font-weight:600; color:#1a1a1a;">{{paidAt}}</td>
                       </tr>
                     </table>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 16px 20px;">
+                  <td style="padding:14px 18px;">
                     <table width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
-                        <td style="font-size:13px; color:#718096;">Customer</td>
-                        <td align="right" style="font-size:13px; font-weight:600; color:#2d3748;">{{email}}</td>
+                        <td style="font-size:13px; color:#888888;">Customer</td>
+                        <td align="right" style="font-size:13px; font-weight:600; color:#1a1a1a;">{{email}}</td>
                       </tr>
                     </table>
                   </td>
                 </tr>
               </table>
-            </td>
-          </tr>
 
-          <!-- Order Summary Heading -->
-          <tr>
-            <td style="background-color:#ffffff; padding: 28px 40px 12px;">
-              <h2 style="margin:0; font-size:16px; font-weight:700; color:#2d3748; border-bottom: 2px solid #e2e8f0; padding-bottom:12px;">
-                Order Summary
-              </h2>
-            </td>
-          </tr>
+              <!-- Order Summary Heading -->
+              <p style="margin:0 0 14px; font-size:15px; font-weight:700; color:#1a1a1a; border-bottom:1px solid #e2e8f0; padding-bottom:12px;">Order Summary</p>
 
-          <!-- Order Items Table -->
-          <tr>
-            <td style="background-color:#ffffff; padding: 0 40px;">
-              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <!-- Order Items Table -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
                 <!-- Table Header -->
-                <tr style="background-color:#f7fafc;">
-                  <td style="padding:10px 12px; font-size:11px; font-weight:700; color:#718096; text-transform:uppercase; letter-spacing:0.8px; border-bottom:1px solid #e2e8f0;">Book</td>
-                  <td style="padding:10px 12px; font-size:11px; font-weight:700; color:#718096; text-transform:uppercase; letter-spacing:0.8px; border-bottom:1px solid #e2e8f0;">Author</td>
-                  <td style="padding:10px 12px; font-size:11px; font-weight:700; color:#718096; text-transform:uppercase; letter-spacing:0.8px; border-bottom:1px solid #e2e8f0;">Format</td>
-                  <td align="right" style="padding:10px 12px; font-size:11px; font-weight:700; color:#718096; text-transform:uppercase; letter-spacing:0.8px; border-bottom:1px solid #e2e8f0;">Price</td>
+                <tr style="background-color:#f7f8fa;">
+                  <td style="padding:10px 10px; font-size:11px; font-weight:700; color:#888888; text-transform:uppercase; letter-spacing:0.8px; border-bottom:1px solid #e2e8f0;">Book</td>
+                  <td style="padding:10px 10px; font-size:11px; font-weight:700; color:#888888; text-transform:uppercase; letter-spacing:0.8px; border-bottom:1px solid #e2e8f0;">Author</td>
+                  <td style="padding:10px 10px; font-size:11px; font-weight:700; color:#888888; text-transform:uppercase; letter-spacing:0.8px; border-bottom:1px solid #e2e8f0;">Format</td>
+                  <td align="right" style="padding:10px 10px; font-size:11px; font-weight:700; color:#888888; text-transform:uppercase; letter-spacing:0.8px; border-bottom:1px solid #e2e8f0;">Price</td>
                 </tr>
 
                 <!-- Dynamic Items -->
                 {{#each items}}
                 <tr>
-                  <td style="padding:14px 12px; font-size:14px; font-weight:600; color:#2d3748; border-bottom:1px solid #f0f4f8; vertical-align:top;">{{this.title}}</td>
-                  <td style="padding:14px 12px; font-size:13px; color:#4a5568; border-bottom:1px solid #f0f4f8; vertical-align:top;">{{this.author}}</td>
-                  <td style="padding:14px 12px; font-size:12px; color:#718096; border-bottom:1px solid #f0f4f8; vertical-align:top;">{{this.bookFormat}}</td>
-                  <td align="right" style="padding:14px 12px; font-size:13px; font-weight:600; color:#2d3748; border-bottom:1px solid #f0f4f8; vertical-align:top; white-space:nowrap;">{{this.currency}} {{this.price}}</td>
+                  <td style="padding:13px 10px; font-size:13px; font-weight:600; color:#1a1a1a; border-bottom:1px solid #f0f4f8; vertical-align:top;">{{this.title}}</td>
+                  <td style="padding:13px 10px; font-size:13px; color:#555555; border-bottom:1px solid #f0f4f8; vertical-align:top;">{{this.author}}</td>
+                  <td style="padding:13px 10px; font-size:12px; color:#888888; border-bottom:1px solid #f0f4f8; vertical-align:top;">{{this.bookFormat}}</td>
+                  <td align="right" style="padding:13px 10px; font-size:13px; font-weight:600; color:#1a1a1a; border-bottom:1px solid #f0f4f8; vertical-align:top; white-space:nowrap;">{{this.currency}} {{this.price}}</td>
                 </tr>
                 {{/each}}
 
                 <!-- Total Row -->
-                <tr style="background-color:#001534;">
-                  <td colspan="3" class="total-label" style="padding:16px 12px; font-size:14px; font-weight:700; color:#ffffff;">Total</td>
-                  <td align="right" class="total-amount" style="padding:16px 12px; font-size:16px; font-weight:800; color:#B4975A; white-space:nowrap;">{{currency}} {{totalAmount}}</td>
+                <tr>
+                  <td colspan="3" style="padding:14px 10px; font-size:14px; font-weight:700; color:#1a1a1a; border-top:2px solid #1a1a1a;">Total</td>
+                  <td align="right" style="padding:14px 10px; font-size:16px; font-weight:700; color:#1a1a1a; border-top:2px solid #1a1a1a; white-space:nowrap;">{{currency}} {{totalAmount}}</td>
                 </tr>
               </table>
-            </td>
-          </tr>
 
-          <!-- Access Info -->
-          <tr>
-            <td style="background-color:#ffffff; padding: 28px 40px 0;">
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: linear-gradient(135deg, #ebf8ff, #e9d8fd); border-radius:10px; border-left: 4px solid #4299e1;">
+              <!-- Access Info -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
                 <tr>
-                  <td style="padding: 18px 20px;">
-                    <p style="margin:0 0 6px; font-size:13px; font-weight:700; color:#2b6cb0;">&#128218;&nbsp; Your books are ready!</p>
-                    <p style="margin:0; font-size:13px; color:#4a5568; line-height:1.6;">
+                  <td style="border-left:3px solid #3b82f6; padding:14px 16px; background-color:#eff6ff;">
+                    <p style="margin:0 0 5px; font-size:13px; font-weight:700; color:#1e40af;">Your books are ready!</p>
+                    <p style="margin:0; font-size:13px; color:#555555; line-height:1.6;">
                       Log in to your account and visit <strong>My Library</strong> to access all your purchased books. Your books will be available immediately.
                     </p>
                   </td>
                 </tr>
               </table>
-            </td>
-          </tr>
 
-          <!-- Support Note -->
-          <tr>
-            <td style="background-color:#ffffff; padding: 24px 40px 32px;">
-              <p style="margin:0; font-size:13px; color:#a0aec0; line-height:1.7; text-align:center;">
+              <!-- Support Note -->
+              <p style="margin:0 0 32px; font-size:13px; color:#888888; line-height:1.7; text-align:center;">
                 If you have any questions about your order, please reply to this email or reach out to our support team.<br>
-                Keep this email as your receipt for reference <strong>{{transactionReference}}</strong>.
+                Keep this email as your receipt for reference <strong style="color:#555555;">{{transactionReference}}</strong>.
               </p>
+
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td align="center" style="background-color:#001534; padding: 24px 40px; border-radius: 0 0 12px 12px;">
-              <p class="footer-name" style="margin:0 0 4px; font-size:14px; font-weight:700; color:#ffffff;">Legacy Bridge Publishing</p>
-              <p class="footer-tagline" style="margin:0; font-size:11px; color:#B4975A; letter-spacing:1px;">Preserving stories. Bridging generations.</p>
+            <td align="center" style="background-color:#f7f8fa; padding:18px 40px; border-radius:0 0 12px 12px; border:1px solid #e2e8f0; border-top:none;">
+              <p style="margin:0 0 3px; font-size:13px; font-weight:600; color:#1a1a1a;">Legacy Bridge Publishing</p>
+              <p style="margin:0; font-size:11px; color:#888888; letter-spacing:0.5px;">Preserving stories. Bridging generations.</p>
             </td>
           </tr>
 
