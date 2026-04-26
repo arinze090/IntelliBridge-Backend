@@ -4,6 +4,15 @@ const morgan = require('morgan');
 
 // Load env variables
 require('dotenv').config();
+const connectDB = require('./config/db');
+
+let isConnected = false;
+
+const connectOnce = async () => {
+  if (isConnected) return;
+  await connectDB();
+  isConnected = true;
+};
 
 const app = express();
 
@@ -21,6 +30,17 @@ app.use(cors(corsOptions));
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+// Database connection middleware (MUST be before routes)
+app.use(async (req, res, next) => {
+  try {
+    await connectOnce();
+    next();
+  } catch (err) {
+    console.error('DB connection failed:', err);
+    res.status(500).json({ message: 'Database connection error' });
+  }
+});
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');

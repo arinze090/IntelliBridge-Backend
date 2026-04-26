@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const connectDB = async (retries = 5, delay = 5000) => {
+const connectDB = async (retries = 3, delay = 2000) => {
   while (retries > 0) {
     try {
       console.log(`Attempting to connect to MongoDB... (${retries} retries left)`);
@@ -11,8 +11,8 @@ const connectDB = async (retries = 5, delay = 5000) => {
       console.error(`Error connecting to MongoDB: ${error.message}`);
       retries -= 1;
       if (retries === 0) {
-        console.error('All retries exhausted. Exiting application.');
-        process.exit(1);
+        console.error('All retries exhausted.');
+        throw error; // Throw error instead of exiting process
       }
       console.log(`Waiting ${delay / 1000} seconds before retrying...`);
       await new Promise(res => setTimeout(res, delay));

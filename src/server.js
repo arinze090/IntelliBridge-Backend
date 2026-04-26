@@ -51,25 +51,5 @@
 // startServer();
 
 const app = require('./app');
-const connectDB = require('./config/db');
-require('dotenv').config();
-
-let isConnected = false;
-
-const connectOnce = async () => {
-  if (isConnected) return;
-  await connectDB();
-  isConnected = true;
-};
-
-app.use(async (req, res, next) => {
-  try {
-    await connectOnce();
-    next();
-  } catch (err) {
-    console.error('DB connection failed:', err);
-    res.status(500).json({ message: 'Database connection error' });
-  }
-});
 
 module.exports = app;
