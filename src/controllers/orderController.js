@@ -400,6 +400,17 @@ const rectifyDisputedOrder = async (req, res) => {
 
     const totalAmount = orderItems.reduce((sum, item) => sum + item.price, 0);
 
+    // Validate that the paid amount covers the books
+    if (paymentMethod.toLowerCase() === 'paystack' && finalPaymentData.amount) {
+      // Paystack returns amount in kobo, so divide by 100 to compare with NGN price
+      const actualPaidAmount = finalPaymentData.amount / 100;
+      if (totalAmount > actualPaidAmount) {
+        return res.status(400).json({ 
+          message: `Cannot rectify: The total price of the requested books (${totalAmount}) is higher than the amount actually paid (${actualPaidAmount}).` 
+        });
+      }
+    }
+
     // Create Order
     const order = await Order.create({
       user: userId,
