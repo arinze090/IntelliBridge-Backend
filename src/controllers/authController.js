@@ -15,11 +15,30 @@ const generateToken = (id) => {
 // @access  Public
 const signup = async (req, res) => {
   try {
-    const { fullname, email, username, password } = req.body;
+    const { fullname, email, username, password, source } = req.body;
 
     // Check for missing fields
     if (!fullname || !email || !username || !password) {
       return res.status(400).json({ message: 'Please provide all required fields' });
+    }
+
+    // Determine the source of signup
+    let finalSource = 'UNKNOWN';
+    if (source) {
+      const upperSource = source.toString().toUpperCase();
+      if (['WEB', 'IOS', 'ANDROID'].includes(upperSource)) {
+        finalSource = upperSource;
+      }
+    } else {
+      // Fallback: Check the User-Agent
+      const userAgent = (req.headers['user-agent'] || '').toUpperCase();
+      if (userAgent.includes('IPHONE') || userAgent.includes('IPAD') || userAgent.includes('CFNETWORK') || userAgent.includes('DARWIN')) {
+        finalSource = 'IOS';
+      } else if (userAgent.includes('ANDROID') || userAgent.includes('DALVIK')) {
+        finalSource = 'ANDROID';
+      } else if (userAgent.length > 0) {
+        finalSource = 'WEB'; // Default to WEB for standard browsers if not distinctly mobile apps
+      }
     }
 
     // Check if user exists
@@ -37,6 +56,7 @@ const signup = async (req, res) => {
       email,
       username,
       password,
+      source: finalSource,
     });
 
     if (user) {
@@ -64,6 +84,7 @@ const signup = async (req, res) => {
           username: user.username,
           profilePicture: user.profilePicture,
           profilePictureId: user.profilePictureId,
+          source: user.source,
         });
       } catch (err) {
         console.error(err);
@@ -79,6 +100,7 @@ const signup = async (req, res) => {
           username: user.username,
           profilePicture: user.profilePicture,
           profilePictureId: user.profilePictureId,
+          source: user.source,
         });
       }
     } else {
@@ -261,9 +283,9 @@ const resendVerificationEmail = async (req, res) => {
       return res.status(404).json({ message: 'There is no user with that email' });
     }
 
-    // if (user.isVerified) {
-    //   return res.status(400).json({ message: 'Email is already verified' });
-    // }
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'Email is already verified' });
+    }
 
     // Generate random 6-digit OTP
     const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();

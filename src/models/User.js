@@ -58,6 +58,11 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  source: {
+    type: String,
+    enum: ['WEB', 'IOS', 'ANDROID', 'UNKNOWN'],
+    default: 'UNKNOWN'
+  },
   verifyEmailOtp: String,
   verifyEmailExpire: Date,
   resetPasswordOtp: String,

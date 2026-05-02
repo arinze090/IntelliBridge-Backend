@@ -3,6 +3,7 @@ const https = require('https');
 const Order = require('../models/Order');
 const UserBook = require('../models/UserBook');
 const Book = require('../models/Book');
+const User = require('../models/User');
 const sendEmail = require('../utils/sendEmail');
 
 // Helper: verify a Paystack transaction reference
@@ -271,10 +272,216 @@ const getOrderById = async (req, res) => {
   }
 };
 
+// @desc    Admin — Verify a disputed payment via reference
+// @route   GET /api/orders/verify-dispute/:reference
+// @access  Private/Admin
+const verifyDisputedPayment = async (req, res) => {
+  try {
+    const { reference } = req.params;
+    const { paymentMethod } = req.query;
+    
+    if (!paymentMethod) {
+      return res.status(400).json({ message: 'Please provide a paymentMethod' });
+    }
+
+    if (paymentMethod.toLowerCase() === 'applepay') {
+      return res.status(400).json({ message: 'Resolving disputes is not available for Apple Pay at this time.' });
+    }
+
+    if (paymentMethod.toLowerCase() !== 'paystack') {
+      return res.status(400).json({ message: `Unsupported payment method for disputes: ${paymentMethod}` });
+    }
+    
+    // Check if order already exists in our DB
+    const existingOrder = await Order.findOne({ transactionReference: reference }).populate('user', 'fullname email');
+    
+    // Call paystack
+    let paystackData = null;
+    let paymentSuccess = false;
+    try {
+      const result = await verifyPaystackPayment(reference);
+      if (result.status && result.data && result.data.status === 'success') {
+        paymentSuccess = true;
+        paystackData = result.data;
+      }
+    } catch (err) {
+      const errMsg = err.response?.data?.message || err.message;
+      return res.status(400).json({ message: `Payment verification failed: ${errMsg}` });
+    }
+
+    if (!paymentSuccess) {
+      return res.status(404).json({ message: 'Payment was not successful or not found on Paystack', existingOrder });
+    }
+
+    if (existingOrder) {
+      return res.status(200).json({ 
+        message: 'Payment was received and order ALREADY exists. The user might be mistaken.', 
+        orderExists: true,
+        order: existingOrder,
+        paymentData: paystackData
+      });
+    } else {
+      return res.status(200).json({ 
+        message: 'Payment was received but order DOES NOT exist. This order needs to be rectified.', 
+        orderExists: false,
+        paymentData: paystackData
+      });
+    }
+
+  } catch (error) {
+    console.error('Verify disputed payment error:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Admin — Rectify a disputed order
+// @route   POST /api/orders/rectify-dispute
+// @access  Private/Admin
+const rectifyDisputedOrder = async (req, res) => {
+  try {
+    const { transactionReference, paymentMethod, user: userId, paymentData, items, adminNotes } = req.body;
+
+    if (!transactionReference || !paymentMethod || !userId || !items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'Please provide transactionReference, paymentMethod, user, and items' });
+    }
+
+    if (paymentMethod.toLowerCase() === 'applepay') {
+      return res.status(400).json({ message: 'Resolving disputes is not available for Apple Pay at this time.' });
+    }
+
+    if (paymentMethod.toLowerCase() !== 'paystack') {
+      return res.status(400).json({ message: `Unsupported payment method for disputes: ${paymentMethod}` });
+    }
+
+    const existingOrder = await Order.findOne({ transactionReference });
+    if (existingOrder) {
+      return res.status(409).json({ message: 'Order with this transaction reference already exists', orderId: existingOrder._id });
+    }
+
+    // Verify payment again to get actual paidAt, if paystack
+    let actualPaidAt = new Date();
+    let finalPaymentData = paymentData || {};
+    
+    if (paymentMethod.toLowerCase() === 'paystack') {
+      try {
+        const result = await verifyPaystackPayment(transactionReference);
+        if (!result.status || result.data.status !== 'success') {
+           return res.status(400).json({ message: 'Cannot rectify: Payment verification failed on Paystack.' });
+        }
+        finalPaymentData = result.data;
+        if (result.data.paid_at) {
+          actualPaidAt = new Date(result.data.paid_at);
+        }
+      } catch (err) {
+        return res.status(400).json({ message: 'Paystack verification error', error: err.response?.data?.message || err.message });
+      }
+    }
+
+    // Fetch and validate books
+    const bookIds = [...new Set(items)]; 
+    const books = await Book.find({ _id: { $in: bookIds }, isDeleted: false });
+
+    if (books.length !== bookIds.length) {
+      const foundIds = books.map((b) => b._id.toString());
+      const missing = bookIds.filter((id) => !foundIds.includes(id));
+      return res.status(404).json({ message: 'Some books were not found or are unavailable', missing });
+    }
+
+    // Build order items
+    const orderItems = books.map((book) => ({
+      book: book._id,
+      title: book.bookTitle,
+      author: book.author,
+      bookImage: book.bookImage,
+      bookFormat: book.bookFormat,
+      isbn: book.isbn,
+      price: book.price,
+    }));
+
+    const totalAmount = orderItems.reduce((sum, item) => sum + item.price, 0);
+
+    // Create Order
+    const order = await Order.create({
+      user: userId,
+      items: orderItems,
+      totalAmount,
+      paymentMethod: paymentMethod.toLowerCase(),
+      status: 'completed',
+      transactionReference,
+      paymentData: typeof finalPaymentData === 'string' ? finalPaymentData : JSON.stringify(finalPaymentData),
+      paidAt: actualPaidAt,
+      rectificationData: {
+        isRectified: true,
+        rectifiedAt: new Date(),
+        actualPaymentReceivedAt: actualPaidAt,
+        adminNotes: adminNotes || 'Rectified by admin'
+      }
+    });
+
+    // Grant books to user's library
+    const libraryOps = books.map((book) => ({
+      updateOne: {
+        filter: { user: userId, book: book._id },
+        update: {
+          $setOnInsert: {
+            user: userId,
+            book: book._id,
+            order: order._id,
+            purchasedAt: order.paidAt,
+            amountPaid: book.price,
+            accessGranted: true,
+          },
+        },
+        upsert: true,
+      },
+    }));
+
+    await UserBook.bulkWrite(libraryOps);
+    
+    // Optional: send email to user
+    const affectedUser = await User.findById(userId);
+    if (affectedUser) {
+      const formattedDate = new Date(order.paidAt).toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'long', year: 'numeric',
+      });
+      const emailItems = order.items.map((item) => ({
+        title: item.title,
+        author: item.author,
+        bookFormat: item.bookFormat || 'Digital',
+        price: item.price.toLocaleString(),
+        currency: order.currency,
+      }));
+
+      sendEmail({
+        to: affectedUser.email,
+        name: affectedUser.fullname,
+        subject: `Order Rectified & Confirmed — ${order.transactionReference}`,
+        template: 'orderConfirmation',
+        items: emailItems,
+        totalAmount: order.totalAmount.toLocaleString(),
+        currency: order.currency,
+        transactionReference: order.transactionReference,
+        paidAt: formattedDate,
+      }).catch((err) => console.error('Rectified order email failed:', err.message));
+    }
+
+    return res.status(201).json({
+      message: 'Disputed order rectified successfully.',
+      order,
+    });
+
+  } catch (error) {
+    console.error('Rectify disputed order error:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 module.exports = {
   checkout,
   getMyOrders,
   getMyLibrary,
   getAllOrders,
   getOrderById,
+  verifyDisputedPayment,
+  rectifyDisputedOrder,
 };

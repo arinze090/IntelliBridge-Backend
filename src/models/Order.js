@@ -64,6 +64,13 @@ const orderSchema = new mongoose.Schema({
   paidAt: {
     type: Date,
   },
+  // Data for orders that were manually rectified by admin due to missing webhooks/disputes
+  rectificationData: {
+    isRectified: { type: Boolean, default: false },
+    rectifiedAt: { type: Date },
+    actualPaymentReceivedAt: { type: Date },
+    adminNotes: { type: String },
+  },
 }, {
   timestamps: true, // createdAt + updatedAt — important for analytics
 });

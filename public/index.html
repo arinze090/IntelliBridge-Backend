@@ -427,6 +427,8 @@
         <a href="#order-my-library" class="menu-item"><span class="method-badge badge-get">GET</span> My Library</a>
         <a href="#order-get-all" class="menu-item"><span class="method-badge badge-get">GET</span> List All Orders</a>
         <a href="#order-get-one" class="menu-item"><span class="method-badge badge-get">GET</span> Get Order</a>
+        <a href="#order-verify-dispute" class="menu-item"><span class="method-badge badge-get">GET</span> Verify Dispute</a>
+        <a href="#order-rectify-dispute" class="menu-item"><span class="method-badge badge-post">POST</span> Rectify Dispute</a>
       </div>
       <div class="menu-group">
         <div class="menu-title">Test APIs</div>
@@ -603,6 +605,11 @@
             <span class="param-type">string</span>
             <span class="param-desc">Required. Minimum 8 characters, containing uppercase, lowercase, numbers, and symbols.</span>
           </div>
+          <div class="param-row">
+            <span class="param-name">source</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Device source: WEB, IOS, or ANDROID. Falls back to User-Agent parsing if not provided.</span>
+          </div>
         </div>
       </div>
       <div class="endpoint-example">
@@ -611,7 +618,8 @@
   <span class="key">"fullname"</span>: <span class="string">"Jane Doe"</span>,
   <span class="key">"email"</span>: <span class="string">"jane@example.com"</span>,
   <span class="key">"username"</span>: <span class="string">"janedoe"</span>,
-  <span class="key">"password"</span>: <span class="string">"P@ssw0rd123!"</span>
+  <span class="key">"password"</span>: <span class="string">"P@ssw0rd123!"</span>,
+  <span class="key">"source"</span>: <span class="string">"IOS"</span>
 }</pre>
         <div class="example-title">Example Response (201 Created)</div>
         <pre>{
@@ -621,6 +629,7 @@
   <span class="key">"username"</span>: <span class="string">"janedoe"</span>,
   <span class="key">"profilePicture"</span>: <span class="string">"http://example.com/avatar.jpg"</span>,
   <span class="key">"profilePictureId"</span>: <span class="string">"avatars/1239129412"</span>,
+  <span class="key">"source"</span>: <span class="string">"IOS"</span>,
   <span class="key">"token"</span>: <span class="string">"eyJhbGciOiJIUzI1NiIsIn..."</span>
 }</pre>
       </div>
@@ -1395,6 +1404,102 @@
   },
   <span class="key">"items"</span>: [...],
   <span class="key">"totalAmount"</span>: <span class="number">13700</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Verify Dispute Endpoint -->
+    <section id="order-verify-dispute" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Verify Disputed Payment <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/orders/verify-dispute/:reference</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Verifies a disputed payment with Paystack to check if it was successful. Apple Pay disputes are currently unsupported.</p>
+        <div class="req-params">
+          <h3>Query Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">paymentMethod</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Only "paystack" is currently supported.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>GET /api/orders/verify-dispute/ref_123?paymentMethod=paystack</pre>
+        <div class="example-title">Example Response (200 OK - Exists)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Payment was received and order ALREADY exists. The user might be mistaken."</span>,
+  <span class="key">"orderExists"</span>: <span class="boolean">true</span>,
+  <span class="key">"order"</span>: { ... },
+  <span class="key">"paymentData"</span>: { ... }
+}</pre>
+        <div class="example-title">Example Response (200 OK - Rectify Needed)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Payment was received but order DOES NOT exist. This order needs to be rectified."</span>,
+  <span class="key">"orderExists"</span>: <span class="boolean">false</span>,
+  <span class="key">"paymentData"</span>: { ... }
+}</pre>
+      </div>
+    </section>
+
+    <!-- Rectify Dispute Endpoint -->
+    <section id="order-rectify-dispute" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Rectify Disputed Order <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/orders/rectify-dispute</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Recreates a missing order manually and grants user access to books. Sends a confirmation email to the user.</p>
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">transactionReference</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Valid reference from the payment gateway.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">paymentMethod</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Only "paystack" is currently supported.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">user</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Object ID of the affected user.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">items</span>
+            <span class="param-type">array</span>
+            <span class="param-desc">Required. Array of Book Object IDs.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">paymentData</span>
+            <span class="param-type">object</span>
+            <span class="param-desc">Optional. Useful metadata.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">adminNotes</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Explaining why this was rectified.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"transactionReference"</span>: <span class="string">"ref_123"</span>,
+  <span class="key">"paymentMethod"</span>: <span class="string">"paystack"</span>,
+  <span class="key">"user"</span>: <span class="string">"64f1e9c..."</span>,
+  <span class="key">"items"</span>: [<span class="string">"69bffd..."</span>]
+}</pre>
+        <div class="example-title">Example Response (201 Created)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Disputed order rectified successfully."</span>,
+  <span class="key">"order"</span>: { ... }
 }</pre>
       </div>
     </section>
