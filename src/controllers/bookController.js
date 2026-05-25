@@ -1,10 +1,22 @@
 const Book = require('../models/Book');
+const User = require('../models/User');
 
 // @desc    Create a new book
 // @route   POST /api/books
 // @access  Private/Admin
 const createBook = async (req, res) => {
   try {
+    if (req.body.authorId) {
+      const authorUser = await User.findById(req.body.authorId);
+      if (authorUser) {
+        req.body.authorProfile = {
+          userId: authorUser._id,
+          fullname: authorUser.fullname,
+          username: authorUser.username,
+          profilePicture: authorUser.profilePicture
+        };
+      }
+    }
     const book = await Book.create(req.body);
     res.status(201).json(book);
   } catch (error) {
@@ -69,6 +81,17 @@ const getBookById = async (req, res) => {
 // @access  Private/Admin
 const updateBook = async (req, res) => {
   try {
+    if (req.body.authorId) {
+      const authorUser = await User.findById(req.body.authorId);
+      if (authorUser) {
+        req.body.authorProfile = {
+          userId: authorUser._id,
+          fullname: authorUser.fullname,
+          username: authorUser.username,
+          profilePicture: authorUser.profilePicture
+        };
+      }
+    }
     const book = await Book.findByIdAndUpdate(
       req.params.id,
       req.body,

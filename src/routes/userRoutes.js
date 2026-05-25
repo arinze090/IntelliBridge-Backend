@@ -4,15 +4,19 @@ const {
   getAllUsers,
   getUserById,
   updateUserAdminStatus,
+  updateUserAuthorStatus,
   updateUserSuspendStatus,
   deleteUser,
+  searchAuthors
 } = require('../controllers/adminController');
 const { protect, admin } = require('../middlewares/authMiddleware');
 
 // All routes here require authentication + admin privileges
+router.get('/authors/search',  searchAuthors);
 router.get('/', protect, admin, getAllUsers);
 router.get('/:id', protect, admin, getUserById);
 router.put('/:id/admin', protect, admin, updateUserAdminStatus);
+router.put('/:id/author', protect, admin, updateUserAuthorStatus);
 router.put('/:id/suspend', protect, admin, updateUserSuspendStatus);
 router.delete('/:id', deleteUser);
 

@@ -46,6 +46,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: false
   },
+  isAuthor: {
+    type: Boolean,
+    default: false
+  },
   isVerified: {
     type: Boolean,
     default: false
@@ -67,12 +71,41 @@ const userSchema = new mongoose.Schema({
   verifyEmailExpire: Date,
   resetPasswordOtp: String,
   resetPasswordExpire: Date,
+  searchKeywords: {
+    type: [String],
+    default: [],
+    select: false
+  }
 }, {
   timestamps: true
 });
 
-// Encrypt password using bcrypt before saving
+// Helper to generate n-grams for fuzzy search
+const generateNGrams = (text) => {
+  if (!text) return [];
+  const minGram = 2;
+  const maxGram = 15;
+  const str = text.toLowerCase();
+  const nGrams = [];
+  for (let i = 0; i < str.length; i++) {
+    for (let j = minGram; j <= maxGram && i + j <= str.length; j++) {
+      nGrams.push(str.substring(i, i + j));
+    }
+  }
+  return nGrams;
+};
+
+// Encrypt password using bcrypt before saving and generate n-grams
 userSchema.pre('save', async function() {
+  // Generate n-grams for fuzzy searching
+  if (this.isModified('fullname') || this.isModified('username')) {
+    const nameGrams = generateNGrams(this.fullname);
+    const usernameGrams = generateNGrams(this.username);
+    // Combine and remove duplicates
+    this.searchKeywords = [...new Set([...nameGrams, ...usernameGrams])];
+  }
+
+  // Handle password hashing
   if (!this.isModified('password')) {
     return;
   }

@@ -399,7 +399,9 @@
         <div class="menu-title">Users (Admin)</div>
         <a href="#user-get-all" class="menu-item"><span class="method-badge badge-get">GET</span> List Users</a>
         <a href="#user-get-one" class="menu-item"><span class="method-badge badge-get">GET</span> Get User</a>
+        <a href="#user-search-author" class="menu-item"><span class="method-badge badge-get">GET</span> Search Authors</a>
         <a href="#user-admin" class="menu-item"><span class="method-badge badge-put">PUT</span> Toggle Admin</a>
+        <a href="#user-author" class="menu-item"><span class="method-badge badge-put">PUT</span> Toggle Author</a>
         <a href="#user-suspend" class="menu-item"><span class="method-badge badge-put">PUT</span> Suspend / Reactivate</a>
       </div>
 
@@ -500,6 +502,7 @@
   <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
   <span class="key">"email"</span>: <span class="string">"john@example.com"</span>,
   <span class="key">"isAdmin"</span>: <span class="boolean">false</span>,
+  <span class="key">"isAuthor"</span>: <span class="boolean">false</span>,
   <span class="key">"isVerified"</span>: <span class="boolean">true</span>,
   <span class="key">"isSuspended"</span>: <span class="boolean">false</span>
 }</pre>
@@ -533,6 +536,71 @@
   <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
   <span class="key">"email"</span>: <span class="string">"john@example.com"</span>,
   <span class="key">"isAdmin"</span>: <span class="boolean">true</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Search Authors Endpoint -->
+    <section id="user-search-author" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Search Authors <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/users/authors/search</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Search for authors by their full name or username. Uses fuzzy string matching.</p>
+        <div class="req-params">
+          <h3>Query Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">q</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">The search term.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>/api/users/authors/search?q=john</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>[
+  {
+    <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
+    <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
+    <span class="key">"email"</span>: <span class="string">"john@example.com"</span>,
+    <span class="key">"username"</span>: <span class="string">"johndoe"</span>,
+    <span class="key">"profilePicture"</span>: <span class="string">"..."</span>
+  }
+]</pre>
+      </div>
+    </section>
+
+    <!-- Toggle Author Endpoint -->
+    <section id="user-author" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Toggle Author Status <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
+          <span class="endpoint-url">/api/users/:id/author</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Grant or revoke author privileges for a user.</p>
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">isAuthor</span>
+            <span class="param-type">boolean</span>
+            <span class="param-desc">Required. true to make user an author, false to revoke.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{ <span class="key">"isAuthor"</span>: <span class="boolean">true</span> }</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
+  <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
+  <span class="key">"email"</span>: <span class="string">"john@example.com"</span>,
+  <span class="key">"isAuthor"</span>: <span class="boolean">true</span>
 }</pre>
       </div>
     </section>
@@ -1118,6 +1186,11 @@
             <span class="param-desc">Required.</span>
           </div>
           <div class="param-row">
+            <span class="param-name">authorId</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. If provided, backend will auto-fetch and embed author profile details.</span>
+          </div>
+          <div class="param-row">
             <span class="param-name">aboutAuthor</span>
             <span class="param-type">string</span>
             <span class="param-desc">Required.</span>
@@ -1203,6 +1276,19 @@
           <span class="endpoint-url">/api/books/:id</span>
         </div>
         <p class="endpoint-desc">Requires Admin privileges. Modifies details of an existing book.</p>
+        <div class="req-params">
+          <h3>Body Parameters (Optional)</h3>
+          <div class="param-row">
+            <span class="param-name">authorId</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">If provided, backend will auto-fetch and embed author profile details.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">price</span>
+            <span class="param-type">number</span>
+            <span class="param-desc">Updated price of the book.</span>
+          </div>
+        </div>
       </div>
       <div class="endpoint-example">
         <div class="example-title">Example Request</div>
