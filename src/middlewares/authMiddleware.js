@@ -50,4 +50,12 @@ const admin = (req, res, next) => {
   }
 };
 
-module.exports = { protect, admin };
+const author = (req, res, next) => {
+  if (req.user && req.user.isAuthor) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Not authorized as an author' });
+  }
+};
+
+module.exports = { protect, admin, author };

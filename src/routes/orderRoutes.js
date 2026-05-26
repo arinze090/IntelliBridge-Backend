@@ -8,13 +8,17 @@ const {
   getOrderById,
   verifyDisputedPayment,
   rectifyDisputedOrder,
+  getAuthorOrders,
 } = require('../controllers/orderController');
-const { protect, admin } = require('../middlewares/authMiddleware');
+const { protect, admin, author } = require('../middlewares/authMiddleware');
 
 // User routes
 router.post('/checkout', protect, checkout);
 router.get('/my-orders', protect, getMyOrders);
 router.get('/my-library', protect, getMyLibrary);
+
+// Author routes
+router.get('/author-orders', protect, author, getAuthorOrders);
 
 // Admin routes
 router.get('/', protect, admin, getAllOrders);

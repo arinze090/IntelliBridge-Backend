@@ -49,6 +49,12 @@ const bookSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide information about the author']
   },
+  authorImage: {
+    type: String
+  },
+  authorImageId: {
+    type: String
+  },
   authorProfile: {
     type: {
       userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

@@ -9,6 +9,10 @@ const orderItemSchema = new mongoose.Schema({
   // Snapshot of book data at time of purchase (preserves history)
   title: { type: String, required: true },
   author: { type: String, required: true },
+  authorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   bookImage: { type: String },
   bookFormat: { type: String },
   isbn: { type: String },

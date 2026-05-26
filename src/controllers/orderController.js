@@ -98,6 +98,7 @@ const checkout = async (req, res) => {
       book: book._id,
       title: book.bookTitle,
       author: book.author,
+      authorId: book.authorProfile ? book.authorProfile.userId : undefined,
       bookImage: book.bookImage,
       bookFormat: book.bookFormat,
       isbn: book.isbn,
@@ -392,6 +393,7 @@ const rectifyDisputedOrder = async (req, res) => {
       book: book._id,
       title: book.bookTitle,
       author: book.author,
+      authorId: book.authorProfile ? book.authorProfile.userId : undefined,
       bookImage: book.bookImage,
       bookFormat: book.bookFormat,
       isbn: book.isbn,
@@ -487,6 +489,73 @@ const rectifyDisputedOrder = async (req, res) => {
   }
 };
 
+// @desc    Get logged-in author's book sales (orders)
+// @route   GET /api/orders/author-orders
+// @access  Private/Author
+const getAuthorOrders = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    // MongoDB aggregation pipeline to extract only the author's books from orders
+    const pipeline = [
+      // 1. Match orders that contain at least one item by this author
+      { $match: { "items.authorId": req.user._id, status: "completed" } },
+      // 2. Unwind the items array so each book is a separate document
+      { $unwind: "$items" },
+      // 3. Match again to keep ONLY the books written by this author
+      { $match: { "items.authorId": req.user._id } },
+      // 4. Sort by date descending
+      { $sort: { paidAt: -1 } },
+      // 5. Pagination
+      { $skip: skip },
+      { $limit: limit },
+      // 6. Project the output to hide other books and only show relevant details
+      {
+        $project: {
+          _id: 1,
+          transactionReference: 1,
+          paidAt: 1,
+          currency: 1,
+          buyerId: "$user",
+          book: "$items",
+        }
+      }
+    ];
+
+    const countPipeline = [
+      { $match: { "items.authorId": req.user._id, status: "completed" } },
+      { $unwind: "$items" },
+      { $match: { "items.authorId": req.user._id } },
+      { $count: "total" }
+    ];
+
+    const [orders, countResult] = await Promise.all([
+      Order.aggregate(pipeline),
+      Order.aggregate(countPipeline)
+    ]);
+
+    // Populate buyer details
+    const populatedOrders = await User.populate(orders, {
+      path: "buyerId",
+      select: "fullname email username profilePicture"
+    });
+
+    const total = countResult.length > 0 ? countResult[0].total : 0;
+
+    res.json({
+      orders: populatedOrders,
+      page,
+      totalPages: Math.ceil(total / limit),
+      totalOrders: total
+    });
+  } catch (error) {
+    console.error('getAuthorOrders error:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 module.exports = {
   checkout,
   getMyOrders,
@@ -495,4 +564,5 @@ module.exports = {
   getOrderById,
   verifyDisputedPayment,
   rectifyDisputedOrder,
+  getAuthorOrders,
 };

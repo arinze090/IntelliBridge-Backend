@@ -429,6 +429,7 @@
         <a href="#order-checkout" class="menu-item"><span class="method-badge badge-post">POST</span> Checkout</a>
         <a href="#order-my-orders" class="menu-item"><span class="method-badge badge-get">GET</span> My Orders</a>
         <a href="#order-my-library" class="menu-item"><span class="method-badge badge-get">GET</span> My Library</a>
+        <a href="#order-author-orders" class="menu-item"><span class="method-badge badge-get">GET</span> Author Orders</a>
         <a href="#order-get-all" class="menu-item"><span class="method-badge badge-get">GET</span> List All Orders</a>
         <a href="#order-get-one" class="menu-item"><span class="method-badge badge-get">GET</span> Get Order</a>
         <a href="#order-verify-dispute" class="menu-item"><span class="method-badge badge-get">GET</span> Verify Dispute</a>
@@ -1262,6 +1263,16 @@
             <span class="param-desc">Required.</span>
           </div>
           <div class="param-row">
+            <span class="param-name">authorImage</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Specific author image to show on the book details. Overrides authorProfile.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">authorImageId</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Cloudinary ID for the author image.</span>
+          </div>
+          <div class="param-row">
             <span class="param-name">description</span>
             <span class="param-type">string</span>
             <span class="param-desc">Required. Summary of the book.</span>
@@ -1319,6 +1330,7 @@
   <span class="key">"bookTitle"</span>: <span class="string">"Dune"</span>,
   <span class="key">"author"</span>: <span class="string">"Frank Herbert"</span>,
   <span class="key">"aboutAuthor"</span>: <span class="string">"He wrote Dune."</span>,
+  <span class="key">"authorImage"</span>: <span class="string">"http://example.com/frank.jpg"</span>,
   <span class="key">"description"</span>: <span class="string">"A book about sand."</span>,
   <span class="key">"price"</span>: <span class="number">15.99</span>,
   <span class="key">"bookImage"</span>: <span class="string">"http://example.com/dune.jpg"</span>,
@@ -1443,6 +1455,64 @@
         <pre>{
   <span class="key">"message"</span>: <span class="string">"Purchase successful! Books added to your library."</span>,
   <span class="key">"order"</span>: { ... }
+}</pre>
+      </div>
+    </section>
+
+    <!-- Author Orders Endpoint -->
+    <section id="order-author-orders" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Author Orders <span style="font-size:12px; font-weight:normal; background:#dbeafe; color:#1e40af; padding:2px 6px; border-radius:4px; margin-left:8px;">Author Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/orders/author-orders</span>
+        </div>
+        <p class="endpoint-desc">Requires Author privileges. Retrieve paginated list of sales for books written by the authenticated author.</p>
+        <div class="req-params">
+          <h3>Query Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">page</span>
+            <span class="param-type">number</span>
+            <span class="param-desc">Optional. Defaults to 1.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">limit</span>
+            <span class="param-type">number</span>
+            <span class="param-desc">Optional. Defaults to 20.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>GET /api/orders/author-orders?page=1</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"orders"</span>: [
+    {
+      <span class="key">"_id"</span>: <span class="string">"645bca7e..."</span>,
+      <span class="key">"transactionReference"</span>: <span class="string">"TX-123456789"</span>,
+      <span class="key">"paidAt"</span>: <span class="string">"2026-05-26T18:02:40.000Z"</span>,
+      <span class="key">"currency"</span>: <span class="string">"NGN"</span>,
+      <span class="key">"buyerId"</span>: {
+        <span class="key">"_id"</span>: <span class="string">"645bcc22..."</span>,
+        <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
+        <span class="key">"email"</span>: <span class="string">"johndoe@gmail.com"</span>,
+        <span class="key">"username"</span>: <span class="string">"johndoe22"</span>,
+        <span class="key">"profilePicture"</span>: <span class="string">"https://res.cloudinary.com/..."</span>
+      },
+      <span class="key">"book"</span>: {
+        <span class="key">"book"</span>: <span class="string">"645bcd..."</span>,
+        <span class="key">"title"</span>: <span class="string">"The Art of Programming"</span>,
+        <span class="key">"author"</span>: <span class="string">"Victor Clifford"</span>,
+        <span class="key">"authorId"</span>: <span class="string">"645bca..."</span>,
+        <span class="key">"bookFormat"</span>: <span class="string">"PDF"</span>,
+        <span class="key">"price"</span>: <span class="number">4500</span>
+      }
+    }
+  ],
+  <span class="key">"page"</span>: <span class="number">1</span>,
+  <span class="key">"totalPages"</span>: <span class="number">1</span>,
+  <span class="key">"totalOrders"</span>: <span class="number">1</span>
 }</pre>
       </div>
     </section>
