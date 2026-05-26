@@ -15,7 +15,7 @@ const generateToken = (id) => {
 // @access  Public
 const signup = async (req, res) => {
   try {
-    const { fullname, email, username, password, source } = req.body;
+    const { fullname, email, username, password, source, role, isAuthor } = req.body;
 
     // Check for missing fields
     if (!fullname || !email || !username || !password) {
@@ -41,6 +41,9 @@ const signup = async (req, res) => {
       }
     }
 
+    // Determine if signing up as author
+    const isAuthorSignup = isAuthor === true || (role && role.toLowerCase() === 'author');
+
     // Check if user exists
     const userExists = await User.findOne({ 
       $or: [{ email }, { username }] 
@@ -57,6 +60,7 @@ const signup = async (req, res) => {
       username,
       password,
       source: finalSource,
+      isAuthor: isAuthorSignup,
     });
 
     if (user) {
@@ -85,6 +89,8 @@ const signup = async (req, res) => {
           profilePicture: user.profilePicture,
           profilePictureId: user.profilePictureId,
           source: user.source,
+          isAdmin: user.isAdmin,
+          isAuthor: user.isAuthor,
         });
       } catch (err) {
         console.error(err);
@@ -101,6 +107,8 @@ const signup = async (req, res) => {
           profilePicture: user.profilePicture,
           profilePictureId: user.profilePictureId,
           source: user.source,
+          isAdmin: user.isAdmin,
+          isAuthor: user.isAuthor,
         });
       }
     } else {
@@ -149,6 +157,8 @@ const login = async (req, res) => {
         username: user.username,
         profilePicture: user.profilePicture,
         profilePictureId: user.profilePictureId,
+        isAdmin: user.isAdmin,
+        isAuthor: user.isAuthor,
         token: generateToken(user._id),
       });
     } else {
@@ -253,6 +263,8 @@ const resetPassword = async (req, res) => {
       username: user.username,
       profilePicture: user.profilePicture,
       profilePictureId: user.profilePictureId,
+      isAdmin: user.isAdmin,
+      isAuthor: user.isAuthor,
       token: generateToken(user._id),
     });
 
@@ -437,6 +449,8 @@ const updateProfile = async (req, res) => {
       username: user.username,
       profilePicture: user.profilePicture,
       profilePictureId: user.profilePictureId,
+      isAdmin: user.isAdmin,
+      isAuthor: user.isAuthor,
     });
   } catch (error) {
     if (error.name === 'ValidationError') {

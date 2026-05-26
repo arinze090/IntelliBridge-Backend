@@ -399,6 +399,8 @@
         <div class="menu-title">Users (Admin)</div>
         <a href="#user-get-all" class="menu-item"><span class="method-badge badge-get">GET</span> List Users</a>
         <a href="#user-get-one" class="menu-item"><span class="method-badge badge-get">GET</span> Get User</a>
+        <a href="#user-authors-all" class="menu-item"><span class="method-badge badge-get">GET</span> List Authors</a>
+        <a href="#user-authors-one" class="menu-item"><span class="method-badge badge-get">GET</span> Get Author</a>
         <a href="#user-search-author" class="menu-item"><span class="method-badge badge-get">GET</span> Search Authors</a>
         <a href="#user-admin" class="menu-item"><span class="method-badge badge-put">PUT</span> Toggle Admin</a>
         <a href="#user-author" class="menu-item"><span class="method-badge badge-put">PUT</span> Toggle Author</a>
@@ -540,6 +542,65 @@
       </div>
     </section>
 
+    <!-- List Authors Endpoint -->
+    <section id="user-authors-all" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">List All Authors <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/users/authors</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Retrieve a list of all users who have author privileges.</p>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>GET /api/users/authors</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>[
+  {
+    <span class="key">"_id"</span>: <span class="string">"699ed17d5..."</span>,
+    <span class="key">"fullname"</span>: <span class="string">"Victor Clifford"</span>,
+    <span class="key">"email"</span>: <span class="string">"victor@legacybridge.com"</span>,
+    <span class="key">"username"</span>: <span class="string">"victor_cliff"</span>,
+    <span class="key">"isAuthor"</span>: <span class="boolean">true</span>
+  }
+]</pre>
+      </div>
+    </section>
+
+    <!-- Get Single Author Endpoint -->
+    <section id="user-authors-one" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Get Author Profile <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/users/authors/:id</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Retrieve details of a specific author by their ID.</p>
+        <div class="req-params">
+          <h3>Path Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">id</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">The MongoDB ID of the author to retrieve.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>GET /api/users/authors/699ed17d5eda62697780e3d2</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"_id"</span>: <span class="string">"699ed17d5eda62697780e3d2"</span>,
+  <span class="key">"fullname"</span>: <span class="string">"Victor Clifford"</span>,
+  <span class="key">"email"</span>: <span class="string">"victor@legacybridge.com"</span>,
+  <span class="key">"username"</span>: <span class="string">"victor_cliff"</span>,
+  <span class="key">"profilePicture"</span>: <span class="string">"https://res.cloudinary.com/..."</span>,
+  <span class="key">"isAuthor"</span>: <span class="boolean">true</span>
+}</pre>
+      </div>
+    </section>
+
     <!-- Search Authors Endpoint -->
     <section id="user-search-author" class="endpoint-section">
       <div class="endpoint-info">
@@ -671,12 +732,17 @@
           <div class="param-row">
             <span class="param-name">password</span>
             <span class="param-type">string</span>
-            <span class="param-desc">Required. Minimum 8 characters, containing uppercase, lowercase, numbers, and symbols.</span>
+            <span class="param-desc">Required. Secure password.</span>
           </div>
           <div class="param-row">
             <span class="param-name">source</span>
             <span class="param-type">string</span>
-            <span class="param-desc">Optional. Device source: WEB, IOS, or ANDROID. Falls back to User-Agent parsing if not provided.</span>
+            <span class="param-desc">Optional. e.g., 'WEB', 'IOS', 'ANDROID'. Defaults to detecting from User-Agent.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">role</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Pass "author" if the user is signing up as an author. Defaults to normal user.</span>
           </div>
         </div>
       </div>
