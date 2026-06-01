@@ -396,7 +396,7 @@
       </div>
 
       <div class="menu-group">
-        <div class="menu-title">Users (Admin)</div>
+        <div class="menu-title">Users & Author Requests</div>
         <a href="#user-get-all" class="menu-item"><span class="method-badge badge-get">GET</span> List Users</a>
         <a href="#user-get-one" class="menu-item"><span class="method-badge badge-get">GET</span> Get User</a>
         <a href="#user-authors-all" class="menu-item"><span class="method-badge badge-get">GET</span> List Authors</a>
@@ -405,6 +405,9 @@
         <a href="#user-admin" class="menu-item"><span class="method-badge badge-put">PUT</span> Toggle Admin</a>
         <a href="#user-author" class="menu-item"><span class="method-badge badge-put">PUT</span> Toggle Author</a>
         <a href="#user-suspend" class="menu-item"><span class="method-badge badge-put">PUT</span> Suspend / Reactivate</a>
+        <a href="#user-author-request-submit" class="menu-item"><span class="method-badge badge-post">POST</span> Submit Request</a>
+        <a href="#user-author-requests-list" class="menu-item"><span class="method-badge badge-get">GET</span> List Requests</a>
+        <a href="#user-author-request-reject" class="menu-item"><span class="method-badge badge-put">PUT</span> Reject Request</a>
       </div>
 
       <div class="menu-group">
@@ -644,7 +647,7 @@
           <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
           <span class="endpoint-url">/api/users/:id/author</span>
         </div>
-        <p class="endpoint-desc">Requires Admin. Grant or revoke author privileges for a user.</p>
+        <p class="endpoint-desc">Requires Admin. Grant or revoke author privileges for a user. Automatically marks any pending author request from the user as approved when <code>isAuthor</code> is set to <code>true</code>.</p>
         <div class="req-params">
           <h3>Body Parameters</h3>
           <div class="param-row">
@@ -699,6 +702,180 @@
         <div class="example-title">Login Response for Suspended User (403)</div>
         <pre>{
   <span class="key">"message"</span>: <span class="string">"Your account has been suspended. Please contact the technical team for assistance."</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Submit Author Request Endpoint -->
+    <section id="user-author-request-submit" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Submit Author Request</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/users/author-request</span>
+        </div>
+        <p class="endpoint-desc">Requires Auth. Submit a request to be promoted to an Author. A user can only submit a request if they are not already an author, and do not have an active pending request or a previously declined request.</p>
+        <div class="req-params">
+          <h3>Headers</h3>
+          <div class="param-row">
+            <span class="param-name">Authorization</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Bearer {token}</span>
+          </div>
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">reason</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Explanation of why the user wants to become an author.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">portfolioUrl</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Link to the user's professional portfolio, writing samples, or website.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"reason"</span>: <span class="string">"I am a historical fiction author with 3 self-published novels."</span>,
+  <span class="key">"portfolioUrl"</span>: <span class="string">"https://johndoewrites.com"</span>
+}</pre>
+        <div class="example-title">Example Response (21 Created)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Request submitted successfully."</span>,
+  <span class="key">"request"</span>: {
+    <span class="key">"user"</span>: <span class="string">"64f1e9c..."</span>,
+    <span class="key">"reason"</span>: <span class="string">"I am a historical fiction author with 3 self-published novels."</span>,
+    <span class="key">"portfolioUrl"</span>: <span class="string">"https://johndoewrites.com"</span>,
+    <span class="key">"_id"</span>: <span class="string">"665b1d2e..."</span>,
+    <span class="key">"status"</span>: <span class="string">"pending"</span>,
+    <span class="key">"createdAt"</span>: <span class="string">"2026-06-01T09:30:00.000Z"</span>,
+    <span class="key">"updatedAt"</span>: <span class="string">"2026-06-01T09:30:00.000Z"</span>
+  }
+}</pre>
+        <div class="example-title">Response if Already Author (400)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"You are already an author."</span>
+}</pre>
+        <div class="example-title">Response if Pending Request Exists (400)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"You already have a pending request."</span>
+}</pre>
+        <div class="example-title">Response if Previously Declined (400)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Your previous request was declined. Please contact support if you believe this is a mistake."</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- List Author Requests Endpoint -->
+    <section id="user-author-requests-list" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">List Author Requests <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-get" style="padding: 6px 12px; font-size: 13px;">GET</span>
+          <span class="endpoint-url">/api/users/author-requests</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Retrieve all author status promotion requests, populated with basic user details. Supports filtering by status and pagination.</p>
+        <div class="req-params">
+          <h3>Headers</h3>
+          <div class="param-row">
+            <span class="param-name">Authorization</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Bearer {token}</span>
+          </div>
+          <h3>Query Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">status</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Filter by request status: <code>pending</code>, <code>approved</code>, or <code>rejected</code>.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">page</span>
+            <span class="param-type">number</span>
+            <span class="param-desc">Optional. Page number for pagination (defaults to 1).</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">limit</span>
+            <span class="param-type">number</span>
+            <span class="param-desc">Optional. Maximum number of requests per page (defaults to 20).</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"requests"</span>: [
+    {
+      <span class="key">"_id"</span>: <span class="string">"665b1d2e..."</span>,
+      <span class="key">"user"</span>: {
+        <span class="key">"_id"</span>: <span class="string">"64f1e9c..."</span>,
+        <span class="key">"fullname"</span>: <span class="string">"John Doe"</span>,
+        <span class="key">"email"</span>: <span class="string">"john@example.com"</span>,
+        <span class="key">"username"</span>: <span class="string">"johndoe"</span>,
+        <span class="key">"profilePicture"</span>: <span class="string">"https://example.com/avatar.jpg"</span>
+      },
+      <span class="key">"reason"</span>: <span class="string">"I am a historical fiction author with 3 self-published novels."</span>,
+      <span class="key">"portfolioUrl"</span>: <span class="string">"https://johndoewrites.com"</span>,
+      <span class="key">"status"</span>: <span class="string">"pending"</span>,
+      <span class="key">"createdAt"</span>: <span class="string">"2026-06-01T09:30:00.000Z"</span>,
+      <span class="key">"updatedAt"</span>: <span class="string">"2026-06-01T09:30:00.000Z"</span>
+    }
+  ],
+  <span class="key">"page"</span>: 1,
+  <span class="key">"totalPages"</span>: 1,
+  <span class="key">"totalRequests"</span>: 1
+}</pre>
+      </div>
+    </section>
+
+    <!-- Reject Author Request Endpoint -->
+    <section id="user-author-request-reject" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Reject Author Request <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
+          <span class="endpoint-url">/api/users/author-requests/:id/reject</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Decline a pending author promotion request. Can optionally provide feedback or rejection notes.</p>
+        <div class="req-params">
+          <h3>Headers</h3>
+          <div class="param-row">
+            <span class="param-name">Authorization</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Bearer {token}</span>
+          </div>
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">adminNotes</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Internal or feedback notes explaining the decision.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"adminNotes"</span>: <span class="string">"Writing sample link is not public or requires registration."</span>
+}</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Author request rejected."</span>,
+  <span class="key">"request"</span>: {
+    <span class="key">"_id"</span>: <span class="string">"665b1d2e..."</span>,
+    <span class="key">"user"</span>: <span class="string">"64f1e9c..."</span>,
+    <span class="key">"reason"</span>: <span class="string">"I am a historical fiction author with 3 self-published novels."</span>,
+    <span class="key">"portfolioUrl"</span>: <span class="string">"https://johndoewrites.com"</span>,
+    <span class="key">"status"</span>: <span class="string">"rejected"</span>,
+    <span class="key">"adminNotes"</span>: <span class="string">"Writing sample link is not public or requires registration."</span>,
+    <span class="key">"createdAt"</span>: <span class="string">"2026-06-01T09:30:00.000Z"</span>,
+    <span class="key">"updatedAt"</span>: <span class="string">"2026-06-01T09:50:00.000Z"</span>
+  }
+}</pre>
+        <div class="example-title">Response if Already Rejected/Approved (400)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Cannot reject a request that is already rejected."</span>
 }</pre>
       </div>
     </section>

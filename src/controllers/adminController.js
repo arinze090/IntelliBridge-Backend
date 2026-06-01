@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const AuthorRequest = require('../models/AuthorRequest');
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -95,9 +96,18 @@ const updateUserAuthorStatus = async (req, res) => {
     const user = await User.findById(req.params.id);
 
     if (user) {
+      const isMakingAuthor = req.body.isAuthor === true;
       user.isAuthor = req.body.isAuthor !== undefined ? req.body.isAuthor : user.isAuthor;
 
       const updatedUser = await user.save({ validateBeforeSave: false });
+
+      if (isMakingAuthor) {
+        // Automatically approve any pending author requests
+        await AuthorRequest.updateMany(
+          { user: user._id, status: 'pending' },
+          { $set: { status: 'approved' } }
+        );
+      }
 
       res.json({
         _id: updatedUser._id,
@@ -240,6 +250,104 @@ const searchAuthors = async (req, res) => {
   }
 };
 
+// @desc    Submit request to become an author
+// @route   POST /api/users/author-request
+// @access  Private
+const submitAuthorRequest = async (req, res) => {
+  try {
+    if (req.user.isAuthor) {
+      return res.status(400).json({ message: 'You are already an author.' });
+    }
+
+    const existingRequest = await AuthorRequest.findOne({ user: req.user._id }).sort({ createdAt: -1 });
+    
+    if (existingRequest) {
+      if (existingRequest.status === 'pending') {
+        return res.status(400).json({ message: 'You already have a pending request.' });
+      }
+      if (existingRequest.status === 'rejected') {
+        return res.status(400).json({ message: 'Your previous request was declined. Please contact support if you believe this is a mistake.' });
+      }
+    }
+
+    const { reason, portfolioUrl } = req.body;
+
+    const newRequest = await AuthorRequest.create({
+      user: req.user._id,
+      reason,
+      portfolioUrl
+    });
+
+    res.status(201).json({ message: 'Request submitted successfully.', request: newRequest });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Get all author requests
+// @route   GET /api/users/author-requests
+// @access  Private/Admin
+const getAuthorRequests = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    
+    const filter = {};
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
+    const [requests, total] = await Promise.all([
+      AuthorRequest.find(filter)
+        .populate('user', 'fullname email username profilePicture')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      AuthorRequest.countDocuments(filter)
+    ]);
+
+    res.json({
+      requests,
+      page,
+      totalPages: Math.ceil(total / limit),
+      totalRequests: total
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Reject an author request
+// @route   PUT /api/users/author-requests/:id/reject
+// @access  Private/Admin
+const rejectAuthorRequest = async (req, res) => {
+  try {
+    const request = await AuthorRequest.findById(req.params.id);
+    if (!request) {
+      return res.status(404).json({ message: 'Author request not found.' });
+    }
+
+    if (request.status !== 'pending') {
+      return res.status(400).json({ message: `Cannot reject a request that is already ${request.status}.` });
+    }
+
+    request.status = 'rejected';
+    if (req.body.adminNotes) {
+      request.adminNotes = req.body.adminNotes;
+    }
+
+    await request.save();
+
+    res.json({ message: 'Author request rejected.', request });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -249,5 +357,8 @@ module.exports = {
   deleteUser,
   searchAuthors,
   getAllAuthors,
-  getAuthorById
+  getAuthorById,
+  submitAuthorRequest,
+  getAuthorRequests,
+  rejectAuthorRequest
 };
