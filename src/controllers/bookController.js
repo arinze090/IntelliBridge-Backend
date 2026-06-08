@@ -1,5 +1,6 @@
 const Book = require('../models/Book');
 const User = require('../models/User');
+const sendNotification = require('../utils/sendNotification');
 
 // @desc    Create a new book
 // @route   POST /api/books
@@ -18,6 +19,25 @@ const createBook = async (req, res) => {
       }
     }
     const book = await Book.create(req.body);
+
+    // Broadcast new book notification
+    try {
+      // Find all valid tokens
+      const usersWithTokens = await User.find({ fcmTokens: { $exists: true, $not: { $size: 0 } } }).select('+fcmTokens');
+      const allTokens = usersWithTokens.flatMap(u => u.fcmTokens);
+      
+      if (allTokens.length > 0) {
+        sendNotification({
+          tokens: allTokens,
+          title: 'IntelliBridge',
+          body: 'A new book has been added to IntelliBridge 📚',
+          data: { type: 'new_book', bookId: book._id.toString() }
+        }).catch(err => console.error('Broadcast notification error:', err));
+      }
+    } catch (err) {
+      console.error('Failed to broadcast new book notification:', err);
+    }
+
     res.status(201).json(book);
   } catch (error) {
     if (error.name === 'ValidationError') {

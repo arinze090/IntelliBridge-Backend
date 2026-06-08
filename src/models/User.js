@@ -71,6 +71,19 @@ const userSchema = new mongoose.Schema({
   verifyEmailExpire: Date,
   resetPasswordOtp: String,
   resetPasswordExpire: Date,
+  fcmTokens: {
+    type: [String],
+    default: [],
+    select: false
+  },
+  lastActiveAt: {
+    type: Date,
+    default: Date.now
+  },
+  inactiveNotificationSent: {
+    type: Boolean,
+    default: false
+  },
   searchKeywords: {
     type: [String],
     default: [],

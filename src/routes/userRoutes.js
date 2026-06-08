@@ -12,7 +12,9 @@ const {
   getAuthorById,
   submitAuthorRequest,
   getAuthorRequests,
-  rejectAuthorRequest
+  rejectAuthorRequest,
+  sendBulkEmail,
+  sendBulkPushNotification
 } = require('../controllers/adminController');
 const { protect, admin } = require('../middlewares/authMiddleware');
 
@@ -20,6 +22,8 @@ const { protect, admin } = require('../middlewares/authMiddleware');
 router.post('/author-request', protect, submitAuthorRequest);
 
 // All routes below require authentication + admin privileges
+router.post('/bulk-email', protect, admin, sendBulkEmail);
+router.post('/bulk-push', protect, admin, sendBulkPushNotification);
 router.get('/author-requests', protect, admin, getAuthorRequests);
 router.put('/author-requests/:id/reject', protect, admin, rejectAuthorRequest);
 router.get('/authors/search', protect, admin, searchAuthors);

@@ -5,6 +5,7 @@ const UserBook = require('../models/UserBook');
 const Book = require('../models/Book');
 const User = require('../models/User');
 const sendEmail = require('../utils/sendEmail');
+const sendNotification = require('../utils/sendNotification');
 
 // Helper: verify a Paystack transaction reference
 const verifyPaystackPayment = async (reference) => {
@@ -138,6 +139,37 @@ const checkout = async (req, res) => {
     }));
 
     await UserBook.bulkWrite(libraryOps);
+
+    // ── Notify Authors (non-blocking) ──
+    const authorIds = [...new Set(orderItems.map(item => item.authorId).filter(Boolean))];
+    if (authorIds.length > 0) {
+      User.find({ _id: { $in: authorIds } }).select('+fcmTokens').then(authorsToNotify => {
+        authorsToNotify.forEach(author => {
+          const theirBooks = orderItems.filter(item => item.authorId?.toString() === author._id.toString());
+          const bookTitles = theirBooks.map(b => b.title).join(', ');
+          
+          sendNotification({
+            tokens: author.fcmTokens,
+            title: 'Book Sale',
+            body: `Good news. "${bookTitles}" has just been purchased on IntelliBridge.`,
+            data: { type: 'sale', orderId: order._id.toString() }
+          }).catch(err => console.error('Author notification error:', err));
+        });
+      }).catch(err => console.error('Failed to fetch authors for notification:', err));
+    }
+
+    // ── Notify Buyer (non-blocking) ──
+    User.findById(req.user._id).select('+fcmTokens').then(buyer => {
+      if (buyer && buyer.fcmTokens && buyer.fcmTokens.length > 0) {
+        const bookTitles = orderItems.map(item => item.title).join(', ');
+        sendNotification({
+          tokens: buyer.fcmTokens,
+          title: 'Purchase Successful.',
+          body: `Your purchase has been confirmed. "${bookTitles}" is now available in your library`,
+          data: { type: 'purchase_success', orderId: order._id.toString() }
+        }).catch(err => console.error('Buyer notification error:', err));
+      }
+    }).catch(err => console.error('Failed to fetch buyer for notification:', err));
 
     // ── Send order confirmation email (non-blocking) ──
     const formattedDate = new Date(order.paidAt).toLocaleDateString('en-GB', {
@@ -450,6 +482,37 @@ const rectifyDisputedOrder = async (req, res) => {
     }));
 
     await UserBook.bulkWrite(libraryOps);
+    
+    // ── Notify Authors (non-blocking) ──
+    const authorIds = [...new Set(orderItems.map(item => item.authorId).filter(Boolean))];
+    if (authorIds.length > 0) {
+      User.find({ _id: { $in: authorIds } }).select('+fcmTokens').then(authorsToNotify => {
+        authorsToNotify.forEach(author => {
+          const theirBooks = orderItems.filter(item => item.authorId?.toString() === author._id.toString());
+          const bookTitles = theirBooks.map(b => b.title).join(', ');
+          
+          sendNotification({
+            tokens: author.fcmTokens,
+            title: 'Book Sale',
+            body: `Good news. "${bookTitles}" has just been purchased on IntelliBridge.`,
+            data: { type: 'sale', orderId: order._id.toString() }
+          }).catch(err => console.error('Author notification error:', err));
+        });
+      }).catch(err => console.error('Failed to fetch authors for notification:', err));
+    }
+
+    // ── Notify Buyer for rectified order (non-blocking) ──
+    User.findById(userId).select('+fcmTokens').then(buyer => {
+      if (buyer && buyer.fcmTokens && buyer.fcmTokens.length > 0) {
+        const bookTitles = orderItems.map(item => item.title).join(', ');
+        sendNotification({
+          tokens: buyer.fcmTokens,
+          title: 'Purchase Successful.',
+          body: `Your purchase has been confirmed. "${bookTitles}" is now available in your library`,
+          data: { type: 'purchase_success', orderId: order._id.toString() }
+        }).catch(err => console.error('Buyer notification error:', err));
+      }
+    }).catch(err => console.error('Failed to fetch buyer for notification:', err));
     
     // Optional: send email to user
     const affectedUser = await User.findById(userId);

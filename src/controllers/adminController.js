@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const AuthorRequest = require('../models/AuthorRequest');
+const sendNotification = require('../utils/sendNotification');
+const sendEmail = require('../utils/sendEmail');
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -66,12 +68,21 @@ const getAuthorById = async (req, res) => {
 // @access  Private/Admin
 const updateUserAdminStatus = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('+fcmTokens');
 
     if (user) {
+      const isMakingAdmin = req.body.isAdmin === true && !user.isAdmin;
       user.isAdmin = req.body.isAdmin !== undefined ? req.body.isAdmin : user.isAdmin;
 
       const updatedUser = await user.save({ validateBeforeSave: false });
+
+      if (isMakingAdmin) {
+        sendNotification({
+          tokens: user.fcmTokens,
+          title: 'Admin Privileges Granted',
+          body: 'You have been made an admin on the platform.'
+        }).catch(err => console.error('Notification error:', err));
+      }
 
       res.json({
         _id: updatedUser._id,
@@ -93,10 +104,10 @@ const updateUserAdminStatus = async (req, res) => {
 // @access  Private/Admin
 const updateUserAuthorStatus = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('+fcmTokens');
 
     if (user) {
-      const isMakingAuthor = req.body.isAuthor === true;
+      const isMakingAuthor = req.body.isAuthor === true && !user.isAuthor;
       user.isAuthor = req.body.isAuthor !== undefined ? req.body.isAuthor : user.isAuthor;
 
       const updatedUser = await user.save({ validateBeforeSave: false });
@@ -107,6 +118,12 @@ const updateUserAuthorStatus = async (req, res) => {
           { user: user._id, status: 'pending' },
           { $set: { status: 'approved' } }
         );
+
+        sendNotification({
+          tokens: user.fcmTokens,
+          title: 'Congratulations!',
+          body: 'You have been approved as an author.'
+        }).catch(err => console.error('Notification error:', err));
       }
 
       res.json({
@@ -348,6 +365,107 @@ const rejectAuthorRequest = async (req, res) => {
   }
 };
 
+// @desc    Send bulk email to users
+// @route   POST /api/users/bulk-email
+// @access  Private/Admin
+const sendBulkEmail = async (req, res) => {
+  try {
+    const { targetGroup, emails, subject, title, body } = req.body;
+
+    if (!subject || !title || !body) {
+      return res.status(400).json({ message: 'Subject, title, and body are required' });
+    }
+
+    let usersToEmail = [];
+
+    if (targetGroup === 'all') {
+      usersToEmail = await User.find({ isDeleted: false }).select('email fullname');
+    } else if (targetGroup === 'authors') {
+      usersToEmail = await User.find({ isAuthor: true, isDeleted: false }).select('email fullname');
+    } else if (targetGroup === 'users') {
+      usersToEmail = await User.find({ isAuthor: false, isAdmin: false, isDeleted: false }).select('email fullname');
+    } else if (Array.isArray(emails) && emails.length > 0) {
+      usersToEmail = await User.find({ email: { $in: emails }, isDeleted: false }).select('email fullname');
+    } else {
+      return res.status(400).json({ message: 'Please provide a valid targetGroup ("all", "authors", "users") or an array of emails' });
+    }
+
+    if (usersToEmail.length === 0) {
+      return res.status(404).json({ message: 'No users found for the specified criteria' });
+    }
+
+    // Send emails asynchronously
+    let successCount = 0;
+    let failureCount = 0;
+
+    const emailPromises = usersToEmail.map(user => {
+      return sendEmail({
+        to: user.email,
+        name: user.fullname,
+        subject,
+        template: 'customEmail',
+        title,
+        body
+      }).then(() => successCount++)
+        .catch(() => failureCount++);
+    });
+
+    await Promise.allSettled(emailPromises);
+
+    res.json({ message: `Bulk email processing completed. Success: ${successCount}, Failed: ${failureCount}` });
+
+  } catch (error) {
+    console.error('Bulk email error:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Send bulk push notification
+// @route   POST /api/users/bulk-push
+// @access  Private/Admin
+const sendBulkPushNotification = async (req, res) => {
+  try {
+    const { targetGroup, emails, title, body, data } = req.body;
+
+    if (!title || !body) {
+      return res.status(400).json({ message: 'Title and body are required' });
+    }
+
+    let targetUsers = [];
+
+    if (targetGroup === 'all') {
+      targetUsers = await User.find({ isDeleted: false, fcmTokens: { $exists: true, $not: { $size: 0 } } }).select('+fcmTokens');
+    } else if (targetGroup === 'authors') {
+      targetUsers = await User.find({ isAuthor: true, isDeleted: false, fcmTokens: { $exists: true, $not: { $size: 0 } } }).select('+fcmTokens');
+    } else if (targetGroup === 'users') {
+      targetUsers = await User.find({ isAuthor: false, isAdmin: false, isDeleted: false, fcmTokens: { $exists: true, $not: { $size: 0 } } }).select('+fcmTokens');
+    } else if (Array.isArray(emails) && emails.length > 0) {
+      targetUsers = await User.find({ email: { $in: emails }, isDeleted: false, fcmTokens: { $exists: true, $not: { $size: 0 } } }).select('+fcmTokens');
+    } else {
+      return res.status(400).json({ message: 'Please provide a valid targetGroup ("all", "authors", "users") or an array of emails' });
+    }
+
+    const allTokens = targetUsers.flatMap(u => u.fcmTokens);
+
+    if (allTokens.length === 0) {
+      return res.status(404).json({ message: 'No devices found for the specified criteria' });
+    }
+
+    const response = await sendNotification({
+      tokens: allTokens,
+      title,
+      body,
+      data: data || { type: 'admin_broadcast' }
+    });
+
+    res.json({ message: 'Bulk push notification sent', result: response });
+
+  } catch (error) {
+    console.error('Bulk push error:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -360,5 +478,7 @@ module.exports = {
   getAuthorById,
   submitAuthorRequest,
   getAuthorRequests,
-  rejectAuthorRequest
+  rejectAuthorRequest,
+  sendBulkEmail,
+  sendBulkPushNotification
 };

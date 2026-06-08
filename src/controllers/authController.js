@@ -2,6 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
+const sendNotification = require('../utils/sendNotification');
 
 // Generate JWT
 const generateToken = (id) => {
@@ -15,7 +16,7 @@ const generateToken = (id) => {
 // @access  Public
 const signup = async (req, res) => {
   try {
-    const { fullname, email, username, password, source, role, isAuthor } = req.body;
+    const { fullname, email, username, password, source, role, isAuthor, fcmToken } = req.body;
 
     // Check for missing fields
     if (!fullname || !email || !username || !password) {
@@ -61,7 +62,18 @@ const signup = async (req, res) => {
       password,
       source: finalSource,
       isAuthor: isAuthorSignup,
+      fcmTokens: fcmToken ? [fcmToken] : [],
+      lastActiveAt: new Date()
     });
+
+    if (fcmToken) {
+      sendNotification({
+        tokens: fcmToken,
+        title: 'Welcome to IntelliBridge.',
+        body: 'Discover carefully selected books built from real experience and insight',
+        data: { type: 'welcome' }
+      }).catch(err => console.error('Welcome notification error:', err));
+    }
 
     if (user) {
       // Generate random 6-digit OTP
@@ -129,7 +141,7 @@ const signup = async (req, res) => {
 // @access  Public
 const login = async (req, res) => {
   try {
-    const { email, username, password } = req.body;
+    const { email, username, password, fcmToken } = req.body;
 
     // Support logging in with either email or username
     if ((!email && !username) || !password) {
@@ -139,7 +151,7 @@ const login = async (req, res) => {
     // Find the user by either email or username
     const user = await User.findOne({
       $or: [{ email }, { username }]
-    }).select('+password'); // Explicitly include password for verification
+    }).select('+password +fcmTokens'); // Explicitly include password and fcmTokens for verification and updating
 
     if (user && user.isSuspended) {
       return res.status(403).json({ message: 'Your account has been suspended. Please contact the technical team for assistance.' });
@@ -150,6 +162,16 @@ const login = async (req, res) => {
     }
 
     if (user && (await user.matchPassword(password))) {
+      // Track activity
+      user.lastActiveAt = new Date();
+      user.inactiveNotificationSent = false;
+      
+      if (fcmToken && !user.fcmTokens.includes(fcmToken)) {
+        user.fcmTokens.push(fcmToken);
+      }
+      
+      await user.save({ validateBeforeSave: false });
+
       res.json({
         _id: user._id,
         fullname: user.fullname,
@@ -462,6 +484,68 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// @desc    Update FCM Token
+// @route   PUT /api/auth/fcm-token
+// @access  Private
+const updateFcmToken = async (req, res) => {
+  try {
+    const { token, action } = req.body; // action: 'add' or 'remove'
+
+    if (!token) {
+      return res.status(400).json({ message: 'Please provide an FCM token' });
+    }
+
+    const user = await User.findById(req.user._id).select('+fcmTokens');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.lastActiveAt = new Date();
+    user.inactiveNotificationSent = false;
+
+    if (action === 'remove') {
+      user.fcmTokens = user.fcmTokens.filter(t => t !== token);
+    } else {
+      // Default to add
+      if (!user.fcmTokens.includes(token)) {
+        user.fcmTokens.push(token);
+      }
+    }
+
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({ message: 'FCM token updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Send Test Notification
+// @route   POST /api/auth/test-notification
+// @access  Public (for testing purposes)
+const sendTestNotification = async (req, res) => {
+  try {
+    const { token, title, body } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: 'Please provide an FCM token' });
+    }
+
+    const response = await sendNotification({
+      tokens: token,
+      title: title || 'Test Notification',
+      body: body || 'This is a test push notification from Legacy Bridge backend.',
+      data: { test: 'true' }
+    });
+
+    res.status(200).json({ message: 'Test notification sent successfully', response });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
 module.exports = {
   signup,
   login,
@@ -470,5 +554,7 @@ module.exports = {
   resendVerificationEmail,
   verifyEmail,
   deactivateAccount,
-  updateProfile
+  updateProfile,
+  updateFcmToken,
+  sendTestNotification
 };

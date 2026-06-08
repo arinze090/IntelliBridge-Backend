@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { signup, login, forgotPassword, resetPassword, resendVerificationEmail, verifyEmail, deactivateAccount, updateProfile } = require('../controllers/authController');
+const { signup, login, forgotPassword, resetPassword, resendVerificationEmail, verifyEmail, deactivateAccount, updateProfile, updateFcmToken, sendTestNotification } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 
 // Define auth routes
@@ -15,6 +15,10 @@ router.post('/verify-email', verifyEmail);
 
 // User account management
 router.put('/profile', protect, updateProfile);
+router.put('/fcm-token', protect, updateFcmToken);
 router.post('/deactivate', deactivateAccount);
+
+// Test Notification
+router.post('/test-notification', sendTestNotification);
 
 module.exports = router;

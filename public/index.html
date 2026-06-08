@@ -392,6 +392,7 @@
         <a href="#auth-verify" class="menu-item"><span class="method-badge badge-post">POST</span> Verify Email</a>
         <a href="#auth-resend" class="menu-item"><span class="method-badge badge-post">POST</span> Resend OTP</a>
         <a href="#auth-profile" class="menu-item"><span class="method-badge badge-put">PUT</span> Update Profile</a>
+        <a href="#auth-fcm" class="menu-item"><span class="method-badge badge-put">PUT</span> Update FCM Token</a>
         <a href="#auth-deactivate" class="menu-item"><span class="method-badge badge-post">POST</span> Deactivate Account</a>
       </div>
 
@@ -408,6 +409,8 @@
         <a href="#user-author-request-submit" class="menu-item"><span class="method-badge badge-post">POST</span> Submit Request</a>
         <a href="#user-author-requests-list" class="menu-item"><span class="method-badge badge-get">GET</span> List Requests</a>
         <a href="#user-author-request-reject" class="menu-item"><span class="method-badge badge-put">PUT</span> Reject Request</a>
+        <a href="#user-bulk-email" class="menu-item"><span class="method-badge badge-post">POST</span> Bulk Email</a>
+        <a href="#user-bulk-push" class="menu-item"><span class="method-badge badge-post">POST</span> Bulk Push</a>
       </div>
 
       <div class="menu-group">
@@ -441,6 +444,12 @@
       <div class="menu-group">
         <div class="menu-title">Test APIs</div>
         <a href="#test-delete-user" class="menu-item"><span class="method-badge badge-delete">DEL</span> Delete User</a>
+        <a href="#test-push" class="menu-item"><span class="method-badge badge-post">POST</span> Test Push</a>
+      </div>
+
+      <div class="menu-group">
+        <div class="menu-title">System Overview</div>
+        <a href="#push-overview" class="menu-item" style="color: var(--accent-color);">Push Notifications Flow</a>
       </div>
     </div>
   </aside>
@@ -1926,6 +1935,244 @@
       </div>
     </section>
 
+    <!-- ============ NEW ENDPOINTS & OVERVIEWS ============ -->
+    <section id="auth-fcm" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Update FCM Token</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-put" style="padding: 6px 12px; font-size: 13px;">PUT</span>
+          <span class="endpoint-url">/api/auth/fcm-token</span>
+        </div>
+        <p class="endpoint-desc">Requires Auth. Add or remove a Firebase Cloud Messaging (FCM) token for the authenticated user to enable or disable push notifications on a specific device.</p>
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">token</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. The FCM device token.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">action</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. Either <code>"add"</code> or <code>"remove"</code>.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"token"</span>: <span class="string">"cQ7sH2t8Q..."</span>,
+  <span class="key">"action"</span>: <span class="string">"add"</span>
+}</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"FCM token added"</span>
+}</pre>
+      </div>
+    </section>
+
+    <section id="user-bulk-email" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Send Bulk Email <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/users/bulk-email</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Send an HTML-supported custom email to users. Uses the IntelliBridge branded template.</p>
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">targetGroup</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Can be <code>"all"</code>, <code>"authors"</code>, or <code>"users"</code>.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">emails</span>
+            <span class="param-type">array</span>
+            <span class="param-desc">Optional. An array of specific email addresses (if targetGroup is omitted).</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">subject</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. The email subject line.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">title</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. The big header title inside the email.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">body</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. The main content of the email (supports HTML).</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"targetGroup"</span>: <span class="string">"authors"</span>,
+  <span class="key">"subject"</span>: <span class="string">"System Update"</span>,
+  <span class="key">"title"</span>: <span class="string">"Important Author Update"</span>,
+  <span class="key">"body"</span>: <span class="string">"We have added new features to your &lt;b&gt;dashboard&lt;/b&gt;!"</span>
+}</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Bulk email processing completed. Success: 15, Failed: 0"</span>
+}</pre>
+      </div>
+    </section>
+
+    <section id="user-bulk-push" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Send Bulk Push <span style="font-size:12px; font-weight:normal; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; margin-left:8px;">Admin Only</span></h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/users/bulk-push</span>
+        </div>
+        <p class="endpoint-desc">Requires Admin. Send a targeted push notification to users via Firebase Cloud Messaging.</p>
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">targetGroup</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Optional. Can be <code>"all"</code>, <code>"authors"</code>, or <code>"users"</code>.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">emails</span>
+            <span class="param-type">array</span>
+            <span class="param-desc">Optional. An array of specific email addresses (if targetGroup is omitted).</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">title</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. The notification title.</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">body</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. The notification message.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"targetGroup"</span>: <span class="string">"all"</span>,
+  <span class="key">"title"</span>: <span class="string">"Check this out!"</span>,
+  <span class="key">"body"</span>: <span class="string">"New books have arrived in the store."</span>
+}</pre>
+        <div class="example-title">Example Response (200 OK)</div>
+        <pre>{
+  <span class="key">"message"</span>: <span class="string">"Bulk push notification sent"</span>,
+  <span class="key">"result"</span>: { <span class="key">"successCount"</span>: 120, <span class="key">"failureCount"</span>: 2 }
+}</pre>
+      </div>
+    </section>
+
+    <section id="test-push" class="endpoint-section">
+      <div class="endpoint-info">
+        <h2 class="endpoint-title">Test Push Notification</h2>
+        <div class="endpoint-meta">
+          <span class="method-badge badge-post" style="padding: 6px 12px; font-size: 13px;">POST</span>
+          <span class="endpoint-url">/api/auth/test-notification</span>
+        </div>
+        <p class="endpoint-desc">Public endpoint for developers to test Firebase Cloud Messaging by supplying an explicit FCM token.</p>
+        <div class="req-params">
+          <h3>Body Parameters</h3>
+          <div class="param-row">
+            <span class="param-name">token</span>
+            <span class="param-type">string</span>
+            <span class="param-desc">Required. The FCM device token to send the test message to.</span>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint-example">
+        <div class="example-title">Example Request</div>
+        <pre>{
+  <span class="key">"token"</span>: <span class="string">"device_token_abc123"</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- Push Notification Overview Section -->
+    <section id="push-overview" class="endpoint-section" style="background: rgba(88, 166, 255, 0.05);">
+      <div class="endpoint-info" style="width: 100%; flex: none; padding-right: 60px;">
+        <h2 class="endpoint-title" style="color: var(--accent-color); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 30px;">Push Notifications Overview</h2>
+        <p class="endpoint-desc" style="font-size: 16px; margin-bottom: 40px;">
+          IntelliBridge automatically triggers targeted Firebase Cloud Messaging (FCM) push notifications across various scenarios to keep users and authors engaged. Below is a beautifully formatted breakdown of the events that trigger a notification and the payloads they contain.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+          <!-- Scenario 1 -->
+          <div style="background: var(--code-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+            <div style="font-size: 12px; text-transform: uppercase; color: var(--accent-color); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">Event: User Sign Up</div>
+            <h3 style="font-size: 18px; color: #fff; margin-bottom: 15px;">Welcome to IntelliBridge.</h3>
+            <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 15px; font-style: italic;">"Discover carefully selected books built from real experience and insight"</p>
+            <div style="font-size: 13px; color: #8b949e; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+              <span style="color: #7ee787;">Target:</span> The newly registered user<br>
+              <span style="color: #7ee787;">Trigger:</span> POST /api/auth/signup
+            </div>
+          </div>
+
+          <!-- Scenario 2 -->
+          <div style="background: var(--code-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+            <div style="font-size: 12px; text-transform: uppercase; color: var(--put-color); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">Event: User Inactivity</div>
+            <h3 style="font-size: 18px; color: #fff; margin-bottom: 15px;">We miss you.</h3>
+            <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 15px; font-style: italic;">"Your library is still waiting for you"</p>
+            <div style="font-size: 13px; color: #8b949e; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+              <span style="color: #7ee787;">Target:</span> Users inactive for > 7 days<br>
+              <span style="color: #7ee787;">Trigger:</span> Vercel Daily Cron Job
+            </div>
+          </div>
+
+          <!-- Scenario 3 -->
+          <div style="background: var(--code-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+            <div style="font-size: 12px; text-transform: uppercase; color: var(--get-color); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">Event: Book Purchase (Author)</div>
+            <h3 style="font-size: 18px; color: #fff; margin-bottom: 15px;">Book Sale</h3>
+            <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 15px; font-style: italic;">"Good news. '(Book Title)' has just been purchased on IntelliBridge."</p>
+            <div style="font-size: 13px; color: #8b949e; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+              <span style="color: #7ee787;">Target:</span> The author(s) of the book<br>
+              <span style="color: #7ee787;">Trigger:</span> POST /api/orders/checkout
+            </div>
+          </div>
+
+          <!-- Scenario 4 -->
+          <div style="background: var(--code-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+            <div style="font-size: 12px; text-transform: uppercase; color: var(--post-color); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">Event: Book Purchase (Buyer)</div>
+            <h3 style="font-size: 18px; color: #fff; margin-bottom: 15px;">Purchase Successful.</h3>
+            <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 15px; font-style: italic;">"Your purchase has been confirmed. '(Book Title)' is now available in your library"</p>
+            <div style="font-size: 13px; color: #8b949e; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+              <span style="color: #7ee787;">Target:</span> The user who bought the book<br>
+              <span style="color: #7ee787;">Trigger:</span> POST /api/orders/checkout
+            </div>
+          </div>
+
+          <!-- Scenario 5 -->
+          <div style="background: var(--code-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+            <div style="font-size: 12px; text-transform: uppercase; color: #d2a8ff; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">Event: New Book Added</div>
+            <h3 style="font-size: 18px; color: #fff; margin-bottom: 15px;">IntelliBridge</h3>
+            <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 15px; font-style: italic;">"A new book has been added to IntelliBridge 📚"</p>
+            <div style="font-size: 13px; color: #8b949e; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+              <span style="color: #7ee787;">Target:</span> All active app users<br>
+              <span style="color: #7ee787;">Trigger:</span> POST /api/books (Admin)
+            </div>
+          </div>
+
+          <!-- Scenario 6 -->
+          <div style="background: var(--code-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+            <div style="font-size: 12px; text-transform: uppercase; color: #ff7b72; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">Event: Role Upgraded</div>
+            <h3 style="font-size: 18px; color: #fff; margin-bottom: 15px;">Congratulations!</h3>
+            <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 15px; font-style: italic;">"You have been granted Author privileges on IntelliBridge." / "You have been granted Admin privileges..."</p>
+            <div style="font-size: 13px; color: #8b949e; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+              <span style="color: #7ee787;">Target:</span> The upgraded user<br>
+              <span style="color: #7ee787;">Trigger:</span> Admin Role Update
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- Scroll to Top FAB -->

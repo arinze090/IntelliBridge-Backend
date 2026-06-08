@@ -109,3 +109,6 @@ dist
 # macOS files
 .DS_Store
 *.swp
+
+# Firebase Service Account
+legacybridge-4cce0-firebase-adminsdk-fbsvc-cc7f86c24a.json
